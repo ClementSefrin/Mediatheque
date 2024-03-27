@@ -1,5 +1,6 @@
 package serveur;
 
+import app.IDocument;
 import codage.Codage;
 import app.Data;
 import doc.Abonne;
@@ -27,26 +28,10 @@ public class ServiceEmpruntRetour extends Service {
     @Override
     public void run() {
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
-        } catch (ClassNotFoundException e1) {
-            System.err.print("ClassNotFoundException: ");
-            System.err.println(e1.getMessage());
-        }
-        try {
             BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
             PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
-            String line = "Saisissez votre numero d'adherent : ";
-            int numeroAdherent;
-            out.println(Codage.coder(line));
-            line = Codage.decoder(in.readLine());
-            while ((numeroAdherent = numIsCorrect(line)) == -1 && Data.getAbonne(numeroAdherent) != null) {
-                line = "Veuillez entrer un numero valide.";
-                out.println(Codage.coder(line));
-                line = Codage.decoder(in.readLine());
-            }
-
-            abonne = Data.getAbonne(numeroAdherent);
-
+            String line = "";
+            int numeroAdherent = -1;
             boolean quit = false;
             while (!quit) {
                 String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
@@ -57,6 +42,9 @@ public class ServiceEmpruntRetour extends Service {
                 while (!line.equalsIgnoreCase("Emprunt") && !line.equalsIgnoreCase("Retour")) {
                     out.println(Codage.coder("Ce service n'est pas disponible. \n" + demandeService));
                     line = Codage.decoder(in.readLine());
+                    if (ServiceUtils.checkConnectionStatus(line)) {
+                        ServiceUtils.endConnection(getClient(), out);
+                    }
                 }
 
                 if (line.equalsIgnoreCase("Emprunt")) {
@@ -66,13 +54,16 @@ public class ServiceEmpruntRetour extends Service {
                 }
                 line = "Vouler-vous continuer? (Oui/Non)";
                 out.println(Codage.coder(line));
-                quit = Codage.decoder(in.readLine()).equalsIgnoreCase("oui") ? false : true;
+                line = Codage.decoder(in.readLine());
+                while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
+                    line = "Veuillez entrer une réponse valide.";
+                    out.println(Codage.coder(line));
+                    line = Codage.decoder(in.readLine());
+                }
+                quit = Codage.decoder(line).equalsIgnoreCase("non");
             }
 
-            line = "Connexion terminee. Merci d'avoir utilise nos services.";
-            out.println(Codage.coder(line));
-            System.err.println("Un client a termine la connexion.");
-            getClient().close();
+            ServiceUtils.endConnection(getClient(), out);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -83,14 +74,16 @@ public class ServiceEmpruntRetour extends Service {
         String line = "Entrez le numero du document que vous voulez retouner : ";
         out.println(Codage.coder(line));
         line = Codage.decoder(in.readLine());
-        while ((numDoc = numIsCorrect(line)) == -1) {
+        while ((numDoc = ServiceUtils.numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
         }
 
-        Document document = Data.getDocument(numDoc);
-        if (Data.estEmprunter(document)) {
+        IDocument document = Data.getDocument(numDoc);
+        if (document == null) {
+            out.print(Codage.coder("Le document n'existe pas.\n"));
+        } else if (Data.estEmprunter(document)) {
             Data.retour(document);
             out.print(Codage.coder("Le document a bien ete retourne.\n"));
         } else {
@@ -102,10 +95,10 @@ public class ServiceEmpruntRetour extends Service {
     private void emprunt(int numeroAdherent, BufferedReader in, PrintWriter out) throws IOException {
         Abonne abonne = Data.getAbonne(numeroAdherent);
 
-        LinkedList<Document> documentsReserves = new LinkedList<>();
+        LinkedList<IDocument> documentsReserves = new LinkedList<>();
         StringBuilder sb = new StringBuilder();
         boolean empty = true;
-        for (Document doc : Data.getReservations().keySet()) {
+        for (IDocument doc : Data.getReservations().keySet()) {
             if (Data.adherentAReserver(doc, abonne)) {
                 if (empty) {
                     empty = false;
@@ -122,22 +115,38 @@ public class ServiceEmpruntRetour extends Service {
         out.println(Codage.coder(sb.toString()));
 
         int numDocument;
-        String line = Codage.decoder(in.readLine());
-        while ((numDocument = numIsCorrect(line)) == -1) {
+        line = Codage.decoder(in.readLine());
+        while ((numDocument = ServiceUtils.numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
         }
 
-        Document document = Data.getDocument(numDocument);
-        if (Data.estReserver(document) && !Data.adherentAReserver(document, abonne)) {
+        IDocument document = Data.getDocument(numDocument);
+        System.out.println(document.getNumero());
+        if (document == null) {
+            out.print(Codage.coder("Le document n'existe pas.\n"));
+        } else if (Data.estReserver(document) && !Data.adherentAReserver(document, abonne)) {
             out.print(Codage.coder("Le document est reserve par une autre personne.\n"));
         } else if (Data.estEmprunter(document)) {
             out.print(Codage.coder("Le document est deja emprunte.\n"));
         } else {
-            Data.emprunter(document, abonne);
-            Data.retirerReservation(document);
-            out.print(Codage.coder("Emprunt effectue avec succes.\n"));
+            out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant? (Oui/Non)\n" + document.toString()));
+            line = Codage.decoder(in.readLine());
+            while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
+                line = "Veuillez entrer une réponse valide.";
+                out.println(Codage.coder(line));
+                line = Codage.decoder(in.readLine());
+            }
+
+            if (line.equalsIgnoreCase("oui")) {
+                Data.emprunter(document, abonne);
+                Data.retirerReservation(document);
+                out.print(Codage.coder("Emprunt effectue avec succes.\n"));
+            } else {
+                out.print(Codage.coder("Emprunt annule.\n"));
+            }
+
         }
     }
 

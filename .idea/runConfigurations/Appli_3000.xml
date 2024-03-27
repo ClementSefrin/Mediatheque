@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Appli 3000" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="app.Appli" />
+    <module name="Mediatheque" />
+    <option name="PROGRAM_PARAMETERS" value="3000" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

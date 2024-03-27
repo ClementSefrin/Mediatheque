@@ -1,9 +1,7 @@
 package app;
 
-import doc.Abonne;
-import doc.Document;
-import doc.types.DVD;
-import doc.types.Livre;
+import doc.*;
+import doc.types.*;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -128,30 +126,35 @@ public class Data implements Runnable {
     public static boolean estEmprunter(Document d) {
         return emprunts.containsKey(d);
     }
-    public static void retour(Document d) {
-        synchronized (emprunts){
+
+    public static void retour(IDocument d) {
+        synchronized (emprunts) {
             emprunts.remove(d);
         }
     }
-    public static void reserver(Document d, Abonne a) {
-        synchronized (reservations){
+
+    public static void reserver(IDocument d, Abonne a) {
+        synchronized (reservations) {
             reservations.put(d, a);
         }
     }
-    public static boolean estReserver(Document d) {
+
+    public static boolean estReserver(IDocument d) {
         return reservations.containsKey(d);
     }
 
-    public static void emprunter(Document d, Abonne a) {
-        synchronized (emprunts){
+    public static void emprunter(IDocument d, Abonne a) {
+        synchronized (emprunts) {
             emprunts.put(d, a);
         }
     }
-    public static boolean adherentAReserver(Document d, Abonne a) {
+
+    public static boolean adherentAReserver(IDocument d, Abonne a) {
         return reservations.get(d).equals(a);
     }
-    public static void retirerReservation(Document d) {
-        synchronized (reservations){
+
+    public static void retirerReservation(IDocument d) {
+        synchronized (reservations) {
             reservations.remove(d);
         }
     }

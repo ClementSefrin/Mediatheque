@@ -21,16 +21,22 @@ public class Client {
             BufferedReader clavier = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("Connecte au serveur " + socket.getInetAddress() + ":" + socket.getPort());
 
-            String line = "";
+            String inLine, outLine;
 
-            while (!line.equals("Connexion terminee. Merci d'avoir utilise nos services.")) {
-                line = sin.readLine();
-                System.out.println(Codage.decoder(line));
+            while (true) {
+                inLine = sin.readLine();
+                if (inLine.equalsIgnoreCase("quit")) {
+                    break;
+                }
+                System.out.println(Codage.decoder(inLine));
 
-                line = clavier.readLine();
-                sout.println(Codage.coder(line));
+                outLine = clavier.readLine();
+                if (outLine.equalsIgnoreCase("quit")) {
+                    break;
+                }
+                sout.println(Codage.coder(outLine));
             }
-
+            System.err.println("Fin de la connexion. Merci d'avoir utilisé nos services.");
             socket.close();
         } catch (IOException e) {
             System.err.println(e);

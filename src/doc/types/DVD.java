@@ -14,6 +14,7 @@ public class DVD extends Document {
         return this.adulte;
     }
 
+
     @Override
     public String toString() {
         return adulte ? super.toString() + " | Pour adulte" : super.toString();

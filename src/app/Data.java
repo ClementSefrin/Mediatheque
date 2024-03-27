@@ -157,4 +157,17 @@ public class Data implements Runnable {
             reservations.remove(d);
         }
     }
+
+    public static boolean AbonnePeutEmprunter(IDocument d, Abonne a) {
+        return !(d instanceof DVD && ((DVD) d).estAdulte() && !a.estMajeur());
+    }
+
+    public static boolean AbboneExiste(int numero) {
+        for (Abonne a : abonnes) {
+            if (a.getNumero() == numero) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

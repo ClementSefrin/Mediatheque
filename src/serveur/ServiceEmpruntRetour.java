@@ -93,6 +93,16 @@ public class ServiceEmpruntRetour extends Service {
 
 
     private void emprunt(int numeroAdherent, BufferedReader in, PrintWriter out) throws IOException {
+        String line = "Saisissez votre numero d'adherent : ";
+        out.println(Codage.coder(line));
+        line = Codage.decoder(in.readLine());
+
+        while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.AbboneExiste(numeroAdherent)){
+            line = "Veuillez entrer un numero valide.";
+            out.println(Codage.coder(line));
+            line = Codage.decoder(in.readLine());
+        }
+
         Abonne abonne = Data.getAbonne(numeroAdherent);
 
         LinkedList<IDocument> documentsReserves = new LinkedList<>();
@@ -130,6 +140,8 @@ public class ServiceEmpruntRetour extends Service {
             out.print(Codage.coder("Le document est reserve par une autre personne.\n"));
         } else if (Data.estEmprunter(document)) {
             out.print(Codage.coder("Le document est deja emprunte.\n"));
+        } else if (!Data.AbonnePeutEmprunter(document, abonne)) {
+            out.print(Codage.coder("Le DVD est pour personne majeur\n"));
         } else {
             out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant? (Oui/Non)\n" + document.toString()));
             line = Codage.decoder(in.readLine());

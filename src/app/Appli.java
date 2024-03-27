@@ -29,12 +29,12 @@ public class Appli {
             try {
 
                 new Thread(new Serveur(service, port)).start();
-                System.out.println("Serveur lance avec succès sur le port " + port);
+                System.out.println("Serveur lance avec succes sur le port " + port);
             } catch (IOException e) {
-                System.err.println("Probleme lors de la création du serveur : " + e);
+                System.err.println("Probleme lors de la creation du serveur : " + e);
             }
         } else {
-            System.err.println("Probleme lors de la création du serveur");
+            System.err.println("Probleme lors de la creation du serveur");
         }
     }
 

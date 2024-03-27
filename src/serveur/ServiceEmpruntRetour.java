@@ -4,7 +4,6 @@ import app.IDocument;
 import codage.Codage;
 import app.Data;
 import doc.Abonne;
-import doc.Document;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +18,7 @@ public class ServiceEmpruntRetour extends Service {
         - vérifier que l'abonné/le document existe à la récupération du numéro
         - vérifier que le client ne coupe pas la connexion à chaque échange
     */
+
     private Abonne abonne;
 
     public ServiceEmpruntRetour(Socket socket) {

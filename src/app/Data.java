@@ -12,10 +12,10 @@ public class Data implements Runnable {
     private static final String USER = "Admin";
     private static final String PASS = "Admin";
 
-    private static LinkedList<Document> documents = new LinkedList<>();
+    private static LinkedList<IDocument> documents = new LinkedList<>();
     private static LinkedList<Abonne> abonnes = new LinkedList<>();
-    private static HashMap<Document, Abonne> reservations = new HashMap<>();
-    private static HashMap<Document, Abonne> emprunts = new HashMap<>();
+    private static HashMap<IDocument, Abonne> reservations = new HashMap<>();
+    private static HashMap<IDocument, Abonne> emprunts = new HashMap<>();
 
     @Override
     public void run() {
@@ -23,7 +23,6 @@ public class Data implements Runnable {
     }
 
     public static void loadData() {
-
         try {
             Class.forName("org.mariadb.jdbc.Driver");
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
@@ -80,7 +79,7 @@ public class Data implements Runnable {
         }
     }
 
-    public static LinkedList<Document> getDocuments() {
+    public static LinkedList<IDocument> getDocuments() {
         return documents;
     }
 
@@ -88,11 +87,11 @@ public class Data implements Runnable {
         return abonnes;
     }
 
-    public static HashMap<Document, Abonne> getEmprunts() {
+    public static HashMap<IDocument, Abonne> getEmprunts() {
         return emprunts;
     }
 
-    public static HashMap<Document, Abonne> getReservations() {
+    public static HashMap<IDocument, Abonne> getReservations() {
         return reservations;
     }
 
@@ -105,8 +104,8 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static Document getDocument(int numero) {
-        for (Document d : documents) {
+    public static IDocument getDocument(int numero) {
+        for (IDocument d : documents) {
             if (d.getNumero() == numero) {
                 return d;
             }
@@ -123,7 +122,7 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static boolean estEmprunter(Document d) {
+    public static boolean estEmprunter(IDocument d) {
         return emprunts.containsKey(d);
     }
 

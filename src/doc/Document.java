@@ -26,7 +26,6 @@ public class Document implements IDocument {
         this.titre = titre;
     }
 
-    @Override
     public int getNumero() {
         return this.numero;
     }
@@ -36,6 +35,10 @@ public class Document implements IDocument {
     }
 
     @Override
+    public int numero() {
+        return numero;
+    }
+
     public Abonne emprunteur() {
         return empruntePar;
     }
@@ -46,18 +49,22 @@ public class Document implements IDocument {
     }
 
     @Override
-    public void reservationPour(Abonne ab) {
+    public void reservationPour(Abonne ab) throws EmpruntException {
         if (reservePar == null && empruntePar == null) {
             reservePar = ab;
+        } else {
+            throw new EmpruntException();
         }
-
     }
 
     @Override
-    public void empruntPar(Abonne ab) {
+    public void empruntPar(Abonne ab) throws EmpruntException {
         if (empruntePar == null || reservePar == ab) {
             empruntePar = ab;
             reservePar = null;
+        }
+        else {
+            throw new EmpruntException();
         }
     }
 

@@ -138,6 +138,16 @@ public class Data implements Runnable {
             reservations.put(d, a);
         }
     }
+    public static String AbonneAEmpreunter(Abonne a) {
+        StringBuilder sb = new StringBuilder();
+        for (Document d : emprunts.keySet()) {
+            if (emprunts.get(d).equals(a)) {
+                sb.append(d.getTitre()).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
     public static boolean estReserver(Document d) {
         return reservations.containsKey(d);
     }
@@ -145,6 +155,8 @@ public class Data implements Runnable {
     public static void emprunter(Document d, Abonne a) {
         synchronized (emprunts){
             emprunts.put(d, a);
+            retirerReservation(d);
+            
         }
     }
 

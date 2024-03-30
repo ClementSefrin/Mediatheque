@@ -147,6 +147,7 @@ public class Data implements Runnable {
             emprunts.put(d, a);
         }
     }
+
     public static boolean adherentAReserver(Document d, Abonne a) {
         return reservations.get(d).equals(a);
     }
@@ -154,5 +155,27 @@ public class Data implements Runnable {
         synchronized (reservations){
             reservations.remove(d);
         }
+    }
+
+    public static boolean DVDPourMajeur(IDocument d) {
+        if (d instanceof DVD) {
+            return ((DVD) d).estAdulte();
+        }
+        return false;
+    }
+
+    public static boolean AbonnePeutEmprunterDVD(IDocument d, Abonne a) {
+        if (!DVDPourMajeur(d) && !a.estMajeur()) {
+            return false;
+        }
+        return true;
+    }
+    public static boolean AbboneExiste(int numero) {
+        for (Abonne a : abonnes) {
+            if (a.getNumero() == numero) {
+                return true;
+            }
+        }
+        return false;
     }
 }

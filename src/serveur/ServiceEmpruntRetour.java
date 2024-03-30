@@ -27,27 +27,11 @@ public class ServiceEmpruntRetour extends Service {
     @Override
     public void run() {
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
-        } catch (ClassNotFoundException e1) {
-            System.err.print("ClassNotFoundException: ");
-            System.err.println(e1.getMessage());
-        }
-        try {
             BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
             PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
-            String line = "Saisissez votre numero d'adherent : ";
-            int numeroAdherent;
-            out.println(Codage.coder(line));
-            line = Codage.decoder(in.readLine());
-            while ((numeroAdherent = numIsCorrect(line)) == -1 && Data.getAbonne(numeroAdherent) != null) {
-                line = "Veuillez entrer un numero valide.";
-                out.println(Codage.coder(line));
-                line = Codage.decoder(in.readLine());
-            }
-
-            abonne = Data.getAbonne(numeroAdherent);
-
             boolean quit = false;
+            String line = "";
+            int numeroAdherent = -1;
             while (!quit) {
                 String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
                 out.println(Codage.coder(demandeService));
@@ -100,6 +84,15 @@ public class ServiceEmpruntRetour extends Service {
 
 
     private void emprunt(int numeroAdherent, BufferedReader in, PrintWriter out) throws IOException {
+        String line = "Saisissez votre numero d'adherent : ";
+        out.println(Codage.coder(line));
+        line = Codage.decoder(in.readLine());
+        while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.AbboneExiste(numeroAdherent)){
+            line = "Veuillez entrer un numero valide.";
+            out.println(Codage.coder(line));
+            line = Codage.decoder(in.readLine());
+        }
+
         Abonne abonne = Data.getAbonne(numeroAdherent);
 
         LinkedList<Document> documentsReserves = new LinkedList<>();
@@ -117,12 +110,12 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         if (empty)
-            sb.append("Vous n'avez aucun document reserve.\n");
-        sb.append("Entrez le numero du document que vous voulez emprunter : ");
+        sb.append("Vous n'avez aucun document reserve.\n");
+        sb.append(abonne.getNom() + " entrez le numero du document que vous voulez emprunter : ");
         out.println(Codage.coder(sb.toString()));
 
         int numDocument;
-        String line = Codage.decoder(in.readLine());
+        line = Codage.decoder(in.readLine());
         while ((numDocument = numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
@@ -130,16 +123,22 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         Document document = Data.getDocument(numDocument);
-        if (Data.estReserver(document) && !Data.adherentAReserver(document, abonne)) {
+        if (Data.estReserver(document) && !Data.adherentAReserver(document, abonne) ) {
             out.print(Codage.coder("Le document est reserve par une autre personne.\n"));
         } else if (Data.estEmprunter(document)) {
             out.print(Codage.coder("Le document est deja emprunte.\n"));
         } else {
+            if(Data.AbonnePeutEmprunterDVD(document, abonne)){
+                out.print(Codage.coder("le DVD est pour personne majeur\n"));
+            }
+            else{
             Data.emprunter(document, abonne);
             Data.retirerReservation(document);
             out.print(Codage.coder("Emprunt effectue avec succes.\n"));
+            }
         }
     }
+
 
     public static int numIsCorrect(String str) {
         try {

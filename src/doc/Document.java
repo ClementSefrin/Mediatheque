@@ -1,6 +1,7 @@
 package doc;
 
 import app.IDocument;
+import doc.types.DVD;
 
 public class Document implements IDocument {
     private Abonne reservePar = null;
@@ -53,18 +54,22 @@ public class Document implements IDocument {
         if (reservePar == null && empruntePar == null) {
             reservePar = ab;
         } else {
-            throw new EmpruntException();
+            throw new EmpruntException("Le document est déjà réservé ou emprunté.");
         }
     }
 
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {
         if (empruntePar == null || reservePar == ab) {
+            if (this instanceof DVD && ((DVD) this).estAdulte() && !ab.estMajeur()){
+                System.out.println("On léve la première exception.");
+                throw new EmpruntException("Les mineurs ne peuvent pas réserver de DVD pour adultes.");
+            }
             empruntePar = ab;
             reservePar = null;
-        }
-        else {
-            throw new EmpruntException();
+        } else {
+            System.out.println("On léve la deuxième exception.");
+            throw new EmpruntException("Le document est déjà emprunté ou réservé par quelqu'un d'autre.");
         }
     }
 

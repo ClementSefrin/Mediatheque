@@ -47,7 +47,6 @@ public class ServiceEmpruntRetour extends Service {
                 }
 
                 if (line.equalsIgnoreCase("Emprunt")) {
-                    System.out.println("On appelle emprunt");
                     numeroAdherent = emprunt(numeroAdherent, in, out, premierPassage);
                 } else if (line.equalsIgnoreCase("Retour")) {
                     retour(in, out);
@@ -123,31 +122,17 @@ public class ServiceEmpruntRetour extends Service {
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
         }
-
         Document document = Data.getDocument(numDocument);
-        if (!Data.documentReserver(document)) {
-            System.out.println(Data.AbonneAEmpreunter(abonne));
-            out.print(Codage.coder("Le document est reserve par une autre personne.\n"));
-        }
-        else if (Data.estEmprunter(document) && !Data.adherentAReserver(document, abonne)) {
-            out.print(Codage.coder("Le document est deja emprunte.\n"));
-        }
-        if(Data.estUnDVD(document)){
-            if(Data.AbonnePeutEmprunterDVD(document, abonne)){
-                Data.emprunter(document, abonne);
-                Data.retirerReservation(document);
-                out.print(Codage.coder("Emprunt effectue avec succes.\n"));
-            }
-            else{
-                out.print(Codage.coder("Le DVD est pour personne majeur\n"));
-            }
-        }
-        else {
+        try {
+            document.empruntPar(abonne);
             Data.emprunter(document, abonne);
             Data.retirerReservation(document);
             out.print(Codage.coder("Emprunt effectue avec succes.\n"));
+        } catch (EmpruntException e) {
+            out.print(Codage.coder( e + "\n"));
+            out.flush();
+            return numeroAdherent;
         }
-
         return numeroAdherent;
     }
 

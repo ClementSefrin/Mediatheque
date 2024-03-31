@@ -20,9 +20,7 @@ public class Client {
             PrintWriter sout = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader clavier = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("Connecte au serveur " + socket.getInetAddress() + ":" + socket.getPort());
-
             String line = "";
-
             while (!line.equals("Connexion terminee. Merci d'avoir utilise nos services.")) {
                 line = sin.readLine();
                 System.out.println(Codage.decoder(line));

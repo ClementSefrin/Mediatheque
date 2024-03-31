@@ -62,7 +62,7 @@ public class ServiceEmpruntRetour extends Service {
                     quit = true;
                     premierPassage = true;
                 }
-             //   quit = Codage.decoder(in.readLine()).equalsIgnoreCase("oui") ? false : true;
+                //   quit = Codage.decoder(in.readLine()).equalsIgnoreCase("oui") ? false : true;
             }
 
             line = "Connexion terminee. Merci d'avoir utilise nos services.";
@@ -108,37 +108,48 @@ public class ServiceEmpruntRetour extends Service {
             numeroAdherent = Integer.parseInt(line);
         }
         Abonne abonne = Data.getAbonne(numeroAdherent);
-         StringBuilder sb = new StringBuilder();
-            if (Data.AbonneAEmpreunter(abonne).isEmpty()) {
-                sb.append("Vous n'avez aucun document reserve.\n");
-            } else {
-                sb.append("Liste des documents reserves : \n" + Data.AbonneAEmpreunter(abonne) + "\n");
-            }
-            sb.append(abonne.getNom() + " entrez le numero du document que vous voulez emprunter : ");
-            out.println(Codage.coder(sb.toString()));
-            int numDocument;
-            line = Codage.decoder(in.readLine());
-            while ((numDocument = numIsCorrect(line)) == -1) {
-                line = "Veuillez entrer un numero valide.";
-                out.println(Codage.coder(line));
-                line = Codage.decoder(in.readLine());
-            }
-            Document document = Data.getDocument(numDocument);
-            if (Data.estReserver(document) && !Data.adherentAReserver(document, abonne)) {
-                out.print(Codage.coder("Le document est reserve par une autre personne.\n"));
-            } else if (Data.estEmprunter(document)) {
-                out.print(Codage.coder("Le document est deja emprunte.\n"));
-            } else {
-                if (Data.AbonnePeutEmprunterDVD(document, abonne)) {
-                    out.print(Codage.coder("le DVD est pour personne majeur\n"));
-                } else {
-                    Data.emprunter(document, abonne);
-                    Data.retirerReservation(document);
-                    out.print(Codage.coder("Emprunt effectue avec succes.\n"));
-                }
-            }
-            return numeroAdherent;
+        StringBuilder sb = new StringBuilder();
+        if (Data.AbonneAEmpreunter(abonne).isEmpty()) {
+            sb.append("Vous n'avez aucun document reserve.\n");
+        } else {
+            sb.append("Liste des documents reserves : \n" + Data.AbonneAEmpreunter(abonne) + "\n");
         }
+        sb.append(abonne.getNom() + " entrez le numero du document que vous voulez emprunter : ");
+        out.println(Codage.coder(sb.toString()));
+        int numDocument;
+        line = Codage.decoder(in.readLine());
+        while ((numDocument = numIsCorrect(line)) == -1) {
+            line = "Veuillez entrer un numero valide.";
+            out.println(Codage.coder(line));
+            line = Codage.decoder(in.readLine());
+        }
+
+        Document document = Data.getDocument(numDocument);
+        if (!Data.documentReserver(document)) {
+            System.out.println(Data.AbonneAEmpreunter(abonne));
+            out.print(Codage.coder("Le document est reserve par une autre personne.\n"));
+        }
+        else if (Data.estEmprunter(document) && !Data.adherentAReserver(document, abonne)) {
+            out.print(Codage.coder("Le document est deja emprunte.\n"));
+        }
+        if(Data.estUnDVD(document)){
+            if(Data.AbonnePeutEmprunterDVD(document, abonne)){
+                Data.emprunter(document, abonne);
+                Data.retirerReservation(document);
+                out.print(Codage.coder("Emprunt effectue avec succes.\n"));
+            }
+            else{
+                out.print(Codage.coder("Le DVD est pour personne majeur\n"));
+            }
+        }
+        else {
+            Data.emprunter(document, abonne);
+            Data.retirerReservation(document);
+            out.print(Codage.coder("Emprunt effectue avec succes.\n"));
+        }
+
+        return numeroAdherent;
+    }
 
     public static int numIsCorrect(String str) {
         try {

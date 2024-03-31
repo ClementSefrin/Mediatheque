@@ -5,6 +5,7 @@ import doc.EmpruntException;
 
 public interface IDocument {
     int numero();
+    int getNumero();
     // return null si pas emprunté ou pas réservé
     Abonne emprunteur() ; // Abonné qui a emprunté ce document
     Abonne reserveur() ; // Abonné qui a réservé ce document

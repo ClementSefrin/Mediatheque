@@ -128,6 +128,7 @@ public class Data implements Runnable {
     public static boolean estEmprunter(Document d) {
         return emprunts.containsKey(d);
     }
+
     public static void retour(Document d) {
         synchronized (emprunts){
             emprunts.remove(d);
@@ -138,10 +139,21 @@ public class Data implements Runnable {
             reservations.put(d, a);
         }
     }
+
     public static String AbonneAEmpreunter(Abonne a) {
         StringBuilder sb = new StringBuilder();
         for (Document d : emprunts.keySet()) {
             if (emprunts.get(d).equals(a)) {
+                sb.append(d.getTitre()).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String AbonneAReserver(Abonne a) {
+        StringBuilder sb = new StringBuilder();
+        for (Document d : reservations.keySet()) {
+            if (reservations.get(d).equals(a)) {
                 sb.append(d.getTitre()).append("\n");
             }
         }
@@ -155,19 +167,27 @@ public class Data implements Runnable {
     public static void emprunter(Document d, Abonne a) {
         synchronized (emprunts){
             emprunts.put(d, a);
-            retirerReservation(d);
-            
         }
     }
 
     public static boolean adherentAReserver(Document d, Abonne a) {
         return reservations.get(d).equals(a);
     }
+
+    public static boolean documentReserver(Document d) {
+        return reservations.containsKey(d);
+    }
+
     public static void retirerReservation(Document d) {
         synchronized (reservations){
             reservations.remove(d);
         }
     }
+
+    public static boolean estUnDVD(Document d) {
+        return d instanceof DVD;
+    }
+
 
     public static boolean DVDPourMajeur(IDocument d) {
         if (d instanceof DVD) {
@@ -182,6 +202,8 @@ public class Data implements Runnable {
         }
         return true;
     }
+
+
     public static boolean AbboneExiste(int numero) {
         for (Abonne a : abonnes) {
             if (a.getNumero() == numero) {

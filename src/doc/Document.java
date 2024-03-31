@@ -25,7 +25,7 @@ public class Document implements IDocument {
         this.numero = numero;
         this.titre = titre;
     }
-
+    @Override
     public int getNumero() {
         return this.numero;
     }

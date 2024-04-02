@@ -5,6 +5,7 @@ import app.Data;
 import doc.Abonne;
 import doc.Document;
 import doc.EmpruntException;
+import doc.types.DVD;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,12 +16,6 @@ import java.net.Socket;
 import static java.lang.Thread.sleep;
 
 public class ServiceEmpruntRetour extends Service {
-
-    /* TODO :
-        - vérifier que l'abonné/le document existe à la récupération du numéro
-        - vérifier que le client ne coupe pas la connexion à chaque échange
-    */
-    private Abonne abonne;
 
 
     public ServiceEmpruntRetour(Socket socket) {
@@ -61,7 +56,6 @@ public class ServiceEmpruntRetour extends Service {
                     quit = true;
                     premierPassage = true;
                 }
-                //   quit = Codage.decoder(in.readLine()).equalsIgnoreCase("oui") ? false : true;
             }
 
             line = "Connexion terminee. Merci d'avoir utilise nos services.";
@@ -83,15 +77,19 @@ public class ServiceEmpruntRetour extends Service {
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
         }
-
         Document document = Data.getDocument(numDoc);
-        if (Data.estEmprunter(document)) {
-            Data.retour(document);
-            out.print(Codage.coder("Le document a bien ete retourne.\n"));
-        } else {
-            out.print(Codage.coder("Le document n'est pas emprunte.\n"));
+        if(!Data.empruntOuReserver(document)){
+            out.print(Codage.coder("Le document n'est pas emprunter ou reserve\n"));
+            return;
         }
-    }
+        if (Data.estEmprunter(document)) {
+            document.retour();
+            out.print(Codage.coder("Le document a bien ete retourne.\n"));
+            }
+            else{
+                out.print(Codage.coder("Le document n'est pas emprunte.\n"));
+            }
+        }
 
 
     private int emprunt(int numeroAdherent, BufferedReader in, PrintWriter out, boolean premierPassage) throws IOException, EmpruntException, InterruptedException {
@@ -106,13 +104,17 @@ public class ServiceEmpruntRetour extends Service {
             }
             numeroAdherent = Integer.parseInt(line);
         }
+
         Abonne abonne = Data.getAbonne(numeroAdherent);
         StringBuilder sb = new StringBuilder();
-        if (Data.AbonneAEmpreunter(abonne).isEmpty()) {
+
+        if (Data.AbonneAEmpreunter(abonne) == null) {
             sb.append("Vous n'avez aucun document reserve.\n");
         } else {
-            sb.append("Liste des documents reserves : \n" + Data.AbonneAEmpreunter(abonne) + "\n");
+            System.out.println(Data.AbonneAEmpreunter(abonne));
+            sb.append("Vous avez un document reserve.\n"+ Data.AbonneAEmpreunter(abonne) + "\n");
         }
+
         sb.append(abonne.getNom() + " entrez le numero du document que vous voulez emprunter : ");
         out.println(Codage.coder(sb.toString()));
         int numDocument;
@@ -125,8 +127,6 @@ public class ServiceEmpruntRetour extends Service {
         Document document = Data.getDocument(numDocument);
         try {
             document.empruntPar(abonne);
-            Data.emprunter(document, abonne);
-            Data.retirerReservation(document);
             out.print(Codage.coder("Emprunt effectue avec succes.\n"));
         } catch (EmpruntException e) {
             out.print(Codage.coder( e + "\n"));

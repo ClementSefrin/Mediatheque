@@ -1,5 +1,6 @@
 package doc;
 
+import app.Data;
 import app.IDocument;
 import doc.types.DVD;
 
@@ -52,8 +53,16 @@ public class Document implements IDocument {
     @Override
     public void reservationPour(Abonne ab) throws EmpruntException {
         synchronized (this){
-            if (reservePar == null && empruntePar == null) {
-                reservePar = ab;
+            if(this instanceof DVD && Data.AbonnePeutPasEmprunterDVD(this, ab)){
+                throw new EmpruntException("DVD réservé pour les majeurs uniquement.");
+            }
+            if (empruntePar == null && reservePar == null) {
+                if(Data.reservation(this, ab)){
+                    empruntePar = null;
+                    reservePar = ab;
+                }else{
+                    throw new EmpruntException("Problème avec la base de données lors de la réservation.");
+                }
             } else {
                 throw new EmpruntException("Le document est déjà réservé ou emprunté.");
             }
@@ -62,18 +71,19 @@ public class Document implements IDocument {
 
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {
-        synchronized (ab){
-            if (empruntePar == null || reservePar == ab) {
-                if (this instanceof DVD && ((DVD) this).estAdulte() && !ab.estMajeur()){
-                    System.out.println("On léve la première exception.");
-                    throw new EmpruntException("Les mineurs ne peuvent pas réserver de DVD pour adultes.");
-                }
-                empruntePar = ab;
-                reservePar = null;
-            } else {
-                System.out.println("On léve la deuxième exception.");
-                throw new EmpruntException("Le document est déjà emprunté ou réservé par quelqu'un d'autre.");
+        synchronized (this) {
+            if(this instanceof DVD && !Data.AbonnePeutPasEmprunterDVD(this, ab)){
+                throw new EmpruntException("L'abonné ne peut pas emprunter ce document.");
             }
+            if (empruntePar == null && reservePar == null) {
+                if(Data.reservation(this, ab)) {
+                    empruntePar = null;
+                    reservePar = ab;
+                }
+            } else {
+                throw new EmpruntException("Le document est déjà réservé ou emprunté.");
+            }
+
         }
     }
 

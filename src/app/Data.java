@@ -17,7 +17,7 @@ public class Data implements Runnable {
     private static LinkedList<Document> documents = new LinkedList<>();
     private static LinkedList<Abonne> abonnes = new LinkedList<>();
     private static HashMap<Document, Abonne> reservations = new HashMap<>();
-    private static HashMap<Document, Abonne> emprunts = new HashMap<>();
+  //  private static HashMap<Document, Abonne> emprunts = new HashMap<>();
 
     @Override
     public void run() {
@@ -25,7 +25,6 @@ public class Data implements Runnable {
     }
 
     public static void loadData() {
-
         try {
             Class.forName("org.mariadb.jdbc.Driver");
             Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
@@ -73,7 +72,6 @@ public class Data implements Runnable {
                 reservations.put(getDocument(i), getAbonne(1));
             }
 
-
         } catch (ClassNotFoundException e1) {
             System.err.print("ClassNotFoundException: ");
             System.err.println(e1.getMessage());
@@ -90,10 +88,6 @@ public class Data implements Runnable {
         return abonnes;
     }
 
-    public static HashMap<Document, Abonne> getEmprunts() {
-        return emprunts;
-    }
-
     public static HashMap<Document, Abonne> getReservations() {
         return reservations;
     }
@@ -108,12 +102,64 @@ public class Data implements Runnable {
     }
 
     public static Document getDocument(int numero) {
+
         for (Document d : documents) {
             if (d.getNumero() == numero) {
                 return d;
             }
         }
         return null;
+    }
+    public static Document getDocumentAbbonne(Abonne a) {
+        for (Document d : documents) {
+            if (d.emprunteur() != null && d.emprunteur().equals(a)) {
+                return d;
+            }
+        }
+        return null;
+    }
+
+
+
+    public static boolean reservation(Document d, Abonne a) {
+        if (reservations.containsKey(d)) {
+            return true;
+        }
+        reservations.put(d, a);
+        return false;
+    }
+
+    public static boolean abbonnePeutEmprunterDvD(Document d, Abonne a) {
+        if (d instanceof DVD) {
+            if (!((DVD) d).estAdulte() && !a.estMajeur()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public static boolean retour(Document d) {
+        if (d.emprunteur() != null) {
+            d.retour();
+            return true;
+        }
+        return false;
+    }
+
+    public static Document AbonneAEmpreunter(Abonne a) {
+        for (Document d : documents) {
+            if (d.emprunteur() != null && d.emprunteur().equals(a)) {
+                return d;
+            }
+        }
+        return null;
+    }
+
+
+
+    public static boolean documentDVD(Document d) {
+        return d instanceof DVD;
     }
 
     public static String NomAbonne(int numero) {
@@ -126,68 +172,60 @@ public class Data implements Runnable {
     }
 
     public static boolean estEmprunter(Document d) {
-        return emprunts.containsKey(d);
+        if(d.emprunteur() == null){
+            return true;
+        }
+        return false;
     }
 
-    public static void retour(Document d) {
-        synchronized (emprunts){
-            emprunts.remove(d);
+    public static boolean DocumentDisponible(Document d) {
+        if(d.emprunteur() == null && d.reserveur() == null){
+            return true;
         }
+        return false;
     }
+
+    public static boolean empruntOuReserver(Document d) {
+        if(d.emprunteur() != null || d.reserveur() != null){
+            return true;
+        }
+        return false;
+    }
+
+
+
+    public static boolean emprunt(Document d, Abonne a) {
+        if(reservations.containsKey(d)) {
+            if (reservations.get(d).equals(a)) {
+                reservations.remove(d);
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void reserver(Document d, Abonne a) {
         synchronized (reservations){
             reservations.put(d, a);
         }
     }
 
-    public static String AbonneAEmpreunter(Abonne a) {
-        StringBuilder sb = new StringBuilder();
-        for (Document d : emprunts.keySet()) {
-            if (emprunts.get(d).equals(a)) {
-                sb.append(d.getTitre()).append("\n");
-            }
-        }
-        return sb.toString();
-    }
-
-    public static String AbonneAReserver(Abonne a) {
-        StringBuilder sb = new StringBuilder();
-        for (Document d : reservations.keySet()) {
-            if (reservations.get(d).equals(a)) {
-                sb.append(d.getTitre()).append("\n");
-            }
-        }
-        return sb.toString();
-    }
-
     public static boolean estReserver(Document d) {
         return reservations.containsKey(d);
-    }
-
-    public static void emprunter(Document d, Abonne a) {
-        synchronized (emprunts){
-            emprunts.put(d, a);
-        }
     }
 
     public static boolean adherentAReserver(Document d, Abonne a) {
         return reservations.get(d).equals(a);
     }
 
-    public static boolean documentReserver(Document d) {
-        return reservations.containsKey(d);
-    }
-
     public static void retirerReservation(Document d) {
-        synchronized (reservations){
             reservations.remove(d);
-        }
     }
 
-    public static boolean estUnDVD(Document d) {
-        return d instanceof DVD;
+    public static boolean clientAReserver(Document d, Abonne a) {
+        return reservations.get(d).equals(a);
     }
-
 
     public static boolean DVDPourMajeur(IDocument d) {
         if (d instanceof DVD) {
@@ -196,8 +234,8 @@ public class Data implements Runnable {
         return false;
     }
 
-    public static boolean AbonnePeutEmprunterDVD(IDocument d, Abonne a) {
-        if (!DVDPourMajeur(d) && !a.estMajeur()) {
+    public static boolean AbonnePeutPasEmprunterDVD(IDocument d, Abonne a) {
+        if (DVDPourMajeur(d) && !a.estMajeur()) {
             return false;
         }
         return true;

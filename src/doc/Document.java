@@ -51,36 +51,40 @@ public class Document implements IDocument {
 
     @Override
     public void reservationPour(Abonne ab) throws EmpruntException {
-        if (reservePar == null && empruntePar == null) {
-            reservePar = ab;
-        } else {
-            throw new EmpruntException("Le document est déjà réservé ou emprunté.");
+        synchronized (this){
+            if (reservePar == null && empruntePar == null) {
+                reservePar = ab;
+            } else {
+                throw new EmpruntException("Le document est déjà réservé ou emprunté.");
+            }
         }
     }
 
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {
-        if (empruntePar == null || reservePar == ab) {
-            if (this instanceof DVD && ((DVD) this).estAdulte() && !ab.estMajeur()){
-                System.out.println("On léve la première exception.");
-                throw new EmpruntException("Les mineurs ne peuvent pas réserver de DVD pour adultes.");
+        synchronized (ab){
+            if (empruntePar == null || reservePar == ab) {
+                if (this instanceof DVD && ((DVD) this).estAdulte() && !ab.estMajeur()){
+                    System.out.println("On léve la première exception.");
+                    throw new EmpruntException("Les mineurs ne peuvent pas réserver de DVD pour adultes.");
+                }
+                empruntePar = ab;
+                reservePar = null;
+            } else {
+                System.out.println("On léve la deuxième exception.");
+                throw new EmpruntException("Le document est déjà emprunté ou réservé par quelqu'un d'autre.");
             }
-            empruntePar = ab;
-            reservePar = null;
-        } else {
-            System.out.println("On léve la deuxième exception.");
-            throw new EmpruntException("Le document est déjà emprunté ou réservé par quelqu'un d'autre.");
         }
     }
 
     @Override
     public void retour() {
-        if (empruntePar != null) {
-            //TODO: envoyer le retour à la BD
-            empruntePar = null;
-        } else if (reservePar != null) {
-            // TODO: envoyer le retour à la BD
-            reservePar = null;
+        synchronized (this){
+            if (empruntePar != null) {
+                empruntePar = null;
+            } else if (reservePar != null) {
+                reservePar = null;
+            }
         }
     }
 

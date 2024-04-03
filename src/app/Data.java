@@ -2,6 +2,7 @@ package app;
 
 import doc.Abonne;
 import doc.Document;
+import doc.EmpruntException;
 import doc.types.DVD;
 import doc.types.Livre;
 
@@ -110,6 +111,8 @@ public class Data implements Runnable {
         }
         return null;
     }
+
+
     public static Document getDocumentAbbonne(Abonne a) {
         for (Document d : documents) {
             if (d.emprunteur() != null && d.emprunteur().equals(a)) {
@@ -119,47 +122,35 @@ public class Data implements Runnable {
         return null;
     }
 
-
-
-    public static boolean reservation(Document d, Abonne a) {
-        if (reservations.containsKey(d)) {
+public static boolean emprunt(Document d, Abonne a) {
+        if(reservations.containsKey(d)){
+            reservations.remove(d);
             return true;
         }
-        reservations.put(d, a);
         return false;
     }
 
-    public static boolean abbonnePeutEmprunterDvD(Document d, Abonne a) {
-        if (d instanceof DVD) {
-            if (!((DVD) d).estAdulte() && !a.estMajeur()) {
-                return false;
-            }
+    public static void ajoutEmprunt(Document d, Abonne a) {
+        synchronized (reservations){
+            reservations.put(d, a);
         }
-        return true;
     }
-
 
     public static boolean retour(Document d) {
-        if (d.emprunteur() != null) {
-            d.retour();
-            return true;
+        if(reservations.containsKey(d)){
+            reservations.remove(d);
         }
         return false;
     }
 
-    public static Document AbonneAEmpreunter(Abonne a) {
-        for (Document d : documents) {
-            if (d.emprunteur() != null && d.emprunteur().equals(a)) {
-                return d;
+    public static String AbonneAEmpreunter(Abonne a) {
+        StringBuilder sb = new StringBuilder();
+        for (Document d : reservations.keySet()) {
+            if (reservations.get(d).equals(a)) {
+                sb.append(d.getTitre()).append("\n");
             }
         }
-        return null;
-    }
-
-
-
-    public static boolean documentDVD(Document d) {
-        return d instanceof DVD;
+        return sb.toString();
     }
 
     public static String NomAbonne(int numero) {
@@ -178,29 +169,9 @@ public class Data implements Runnable {
         return false;
     }
 
-    public static boolean DocumentDisponible(Document d) {
-        if(d.emprunteur() == null && d.reserveur() == null){
-            return true;
-        }
-        return false;
-    }
-
     public static boolean empruntOuReserver(Document d) {
         if(d.emprunteur() != null || d.reserveur() != null){
             return true;
-        }
-        return false;
-    }
-
-
-
-    public static boolean emprunt(Document d, Abonne a) {
-        if(reservations.containsKey(d)) {
-            if (reservations.get(d).equals(a)) {
-                reservations.remove(d);
-            } else {
-                return true;
-            }
         }
         return false;
     }
@@ -223,10 +194,6 @@ public class Data implements Runnable {
             reservations.remove(d);
     }
 
-    public static boolean clientAReserver(Document d, Abonne a) {
-        return reservations.get(d).equals(a);
-    }
-
     public static boolean DVDPourMajeur(IDocument d) {
         if (d instanceof DVD) {
             return ((DVD) d).estAdulte();
@@ -240,7 +207,6 @@ public class Data implements Runnable {
         }
         return true;
     }
-
 
     public static boolean AbboneExiste(int numero) {
         for (Abonne a : abonnes) {

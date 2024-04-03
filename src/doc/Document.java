@@ -53,19 +53,7 @@ public class Document implements IDocument {
     @Override
     public void reservationPour(Abonne ab) throws EmpruntException {
         synchronized (this){
-            if(this instanceof DVD && Data.AbonnePeutPasEmprunterDVD(this, ab)){
-                throw new EmpruntException("DVD réservé pour les majeurs uniquement.");
-            }
-            if (empruntePar == null && reservePar == null) {
-                if(Data.reservation(this, ab)){
-                    empruntePar = null;
-                    reservePar = ab;
-                }else{
-                    throw new EmpruntException("Problème avec la base de données lors de la réservation.");
-                }
-            } else {
-                throw new EmpruntException("Le document est déjà réservé ou emprunté.");
-            }
+
         }
     }
 
@@ -73,12 +61,13 @@ public class Document implements IDocument {
     public void empruntPar(Abonne ab) throws EmpruntException {
         synchronized (this) {
             if(this instanceof DVD && !Data.AbonnePeutPasEmprunterDVD(this, ab)){
-                throw new EmpruntException("L'abonné ne peut pas emprunter ce document.");
+                throw new EmpruntException("Désole, vous ne pouvez pas emprunter ce DVD, car vous êtes mineurs.");
             }
             if (empruntePar == null && reservePar == null) {
-                if(Data.reservation(this, ab)) {
+                if(Data.emprunt(this, ab)) {
                     empruntePar = null;
                     reservePar = ab;
+                    Data.ajoutEmprunt(this, ab);
                 }
             } else {
                 throw new EmpruntException("Le document est déjà réservé ou emprunté.");
@@ -90,11 +79,14 @@ public class Document implements IDocument {
     @Override
     public void retour() {
         synchronized (this){
+            Data.retour(this);
             if (empruntePar != null) {
                 empruntePar = null;
             } else if (reservePar != null) {
+                Data.retirerReservation(this);
                 reservePar = null;
             }
+
         }
     }
 

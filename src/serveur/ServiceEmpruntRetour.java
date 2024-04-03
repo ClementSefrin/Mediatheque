@@ -106,15 +106,13 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         Abonne abonne = Data.getAbonne(numeroAdherent);
-        StringBuilder sb = new StringBuilder();
 
-        if (Data.AbonneAEmpreunter(abonne) == null) {
+        StringBuilder sb = new StringBuilder();
+        if (Data.AbonneAEmpreunter(abonne).isEmpty()) {
             sb.append("Vous n'avez aucun document reserve.\n");
         } else {
-            System.out.println(Data.AbonneAEmpreunter(abonne));
             sb.append("Vous avez un document reserve.\n"+ Data.AbonneAEmpreunter(abonne) + "\n");
         }
-
         sb.append(abonne.getNom() + " entrez le numero du document que vous voulez emprunter : ");
         out.println(Codage.coder(sb.toString()));
         int numDocument;

@@ -1,6 +1,8 @@
 package doc;
 
+import app.Data;
 import app.IDocument;
+import doc.types.DVD;
 
 public class Document implements IDocument {
     private Abonne reservePar = null;
@@ -25,7 +27,6 @@ public class Document implements IDocument {
         this.numero = numero;
         this.titre = titre;
     }
-
     @Override
     public int getNumero() {
         return this.numero;
@@ -36,6 +37,10 @@ public class Document implements IDocument {
     }
 
     @Override
+    public int numero() {
+        return numero;
+    }
+
     public Abonne emprunteur() {
         return empruntePar;
     }
@@ -46,29 +51,42 @@ public class Document implements IDocument {
     }
 
     @Override
-    public void reservationPour(Abonne ab) {
-        if (reservePar == null && empruntePar == null) {
-            reservePar = ab;
-        }
+    public void reservationPour(Abonne ab) throws EmpruntException {
+        synchronized (this){
 
+        }
     }
 
     @Override
-    public void empruntPar(Abonne ab) {
-        if (empruntePar == null || reservePar == ab) {
-            empruntePar = ab;
-            reservePar = null;
+    public void empruntPar(Abonne ab) throws EmpruntException {
+        synchronized (this) {
+            if(this instanceof DVD && !Data.AbonnePeutPasEmprunterDVD(this, ab)){
+                throw new EmpruntException("Désole, vous ne pouvez pas emprunter ce DVD, car vous êtes mineurs.");
+            }
+            if (empruntePar == null && reservePar == null) {
+                if(Data.emprunt(this, ab)) {
+                    empruntePar = null;
+                    reservePar = ab;
+                    Data.ajoutEmprunt(this, ab);
+                }
+            } else {
+                throw new EmpruntException("Le document est déjà réservé ou emprunté.");
+            }
+
         }
     }
 
     @Override
     public void retour() {
-        if (empruntePar != null) {
-            //TODO: envoyer le retour à la BD
-            empruntePar = null;
-        } else if (reservePar != null) {
-            // TODO: envoyer le retour à la BD
-            reservePar = null;
+        synchronized (this){
+            Data.retour(this);
+            if (empruntePar != null) {
+                empruntePar = null;
+            } else if (reservePar != null) {
+                Data.retirerReservation(this);
+                reservePar = null;
+            }
+
         }
     }
 

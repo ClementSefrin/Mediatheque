@@ -4,6 +4,7 @@ import app.IDocument;
 import codage.Codage;
 import app.Data;
 import doc.Abonne;
+import doc.Document;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class ServiceReservation extends Service {
                 if (doc == null)
                     out.println(Codage.coder("Ce document n'existe pas."));
                 else {
-                    if (Data.estReserver(doc) || Data.estEmprunter(doc))
+                    if (Data.estEmprunte((Document) doc) || Data.estReserve((Document) doc) && !Data.adherentAReserve((Document) doc, abonne))
                         out.println(Codage.coder("Ce document est deja reserve ou emprunte."));
                     else {
                         if(Data.abonnePeutPasEmprunterDVD(doc, abonne)){

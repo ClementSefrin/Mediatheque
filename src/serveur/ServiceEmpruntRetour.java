@@ -23,7 +23,7 @@ public class ServiceEmpruntRetour extends Service {
             BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
             PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
             boolean quit = false;
-            String line;
+            String line = "";
             boolean premierPassage = true;
             int numeroAdherent = -1;
             while (!quit) {
@@ -42,8 +42,10 @@ public class ServiceEmpruntRetour extends Service {
                     retour(in, out);
                 line = "Vouler-vous continuer? (Oui/Non)";
                 out.println(Codage.coder(line));
-                if(Codage.decoder(in.readLine()).equalsIgnoreCase("oui"))
+                if(quit = Codage.decoder(in.readLine()).equalsIgnoreCase("oui")){
+                    quit = false;
                     premierPassage = false;
+                }
                 else {
                     quit = true;
                     premierPassage = true;
@@ -96,14 +98,13 @@ public class ServiceEmpruntRetour extends Service {
         if (premierPassage) {
             out.println(Codage.coder("Veuillez entrer votre numero d'adherent : "));
             line = Codage.decoder(in.readLine());
-
             while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)) {
                 line = "Veuillez entrer un numero valide.";
                 out.println(Codage.coder(line));
                 line = Codage.decoder(in.readLine());
             }
-
             numeroAdherent = Integer.parseInt(line);
+
         }
 
         Abonne abonne = Data.getAbonne(numeroAdherent);
@@ -118,8 +119,7 @@ public class ServiceEmpruntRetour extends Service {
         out.println(Codage.coder(sb.toString()));
 
         int numDocument;
-        line = Codage.decoder(in.readLine()); // TODO : ce code est dupliqué
-
+        line = Codage.decoder(in.readLine());
         while ((numDocument = numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));

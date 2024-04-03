@@ -53,7 +53,7 @@ public class Document implements IDocument {
     @Override
     public void reservationPour(Abonne ab) throws EmpruntException {
         synchronized (this){
-
+            // TODO : à faire
         }
     }
 

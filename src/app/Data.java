@@ -135,12 +135,8 @@ public static boolean emprunt(Document d, Abonne a) {
         }
     }
 
-    public static boolean retour(Document d) {
-        if(reservations.containsKey(d)){
-            reservations.remove(d);
-            // return true; ????
-        }
-        return false;
+    public static void retour(Document d) {
+        reservations.remove(d);
     }
 
     public static String abonneAEmprunte(Abonne a) {

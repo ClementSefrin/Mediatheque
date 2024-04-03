@@ -36,7 +36,8 @@ public class Data implements Runnable {
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                abonnes.add(new Abonne(resultSet.getInt("Numero"), resultSet.getString("Nom"), resultSet.getDate("DateNaissance")));
+                abonnes.add(new Abonne(resultSet.getInt("Numero"), resultSet.getString("Nom"),
+                        resultSet.getDate("DateNaissance")));
             }
 
             //Récupération des documents

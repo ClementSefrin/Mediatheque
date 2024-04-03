@@ -12,8 +12,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ServiceReservation extends Service {
-    private Abonne abonne;
-
     public ServiceReservation(Socket socket) {
         super(socket);
     }
@@ -30,38 +28,40 @@ public class ServiceReservation extends Service {
             String line = in.readLine();
             int numeroAdherent;
 
-            while ((numeroAdherent = numIsCorrect(line)) == -1 && Data.getAbonne(numeroAdherent) != null) {
+            while ((numeroAdherent = ServiceUtils.numIsCorrect(line)) == -1 && Data.getAbonne(numeroAdherent) != null) {
                 line = "Veuillez entrer un numero valide.";
                 out.println(Codage.coder(line));
                 line = Codage.decoder(in.readLine());
             }
 
-            abonne = Data.getAbonne(numeroAdherent);
+            Abonne abonne = Data.getAbonne(numeroAdherent);
             boolean continuer = true;
 
             while (continuer) {
+                assert abonne != null;
                 out.println(Codage.coder("Que voulez-vous reserver, " + abonne.getNom() + " ? > "));
                 int numDocs = Integer.parseInt(in.readLine());
 
                 IDocument doc = Data.getDocument(numDocs - 1);
+                String message;
                 if (doc == null)
-                    out.println(Codage.coder("Ce document n'existe pas."));
+                    message = "Ce document n'existe pas.";
                 else {
-                    if (Data.estReserver(doc) || Data.estEmprunter(doc))
-                        out.println(Codage.coder("Ce document est deja reserve ou emprunte."));
+                    if (Data.estReserve(doc) || Data.estEmprunte(doc))
+                        message = "Ce document est deja reserve ou emprunte.";
                     else {
-                        if(!Data.AbonnePeutEmprunter(doc, abonne)){
-                            out.println(Codage.coder("Le document est reserve aux personnes majeures"));
+                        if(Data.abonnePeutPasEmprunterDVD(doc, abonne)){
+                            message = "Le document est reserve aux personnes majeures";
                         }
                         else {
-                            // TODO : enregister la réservation
-                            out.print(Codage.coder("Vous avez bien reserve " + doc + "\n"));
+                            Data.reserver(doc,abonne);
+                            System.out.println(Data.adherentAReserve(doc,abonne)); // Test
+                            message = "Vous avez bien reserve " + doc + "\n";
                         }
                     }
                 }
-
-                out.println(Codage.coder("Voulez-vous continuer ? (oui/non)"));
-                continuer = in.readLine().equalsIgnoreCase("oui") ? true : false;
+                out.println(Codage.coder(message + "\nVoulez-vous continuer ? (oui/non)"));
+                continuer = in.readLine().trim().equalsIgnoreCase("oui");
             }
 
             out.println(Codage.coder("Connexion terminee. Merci d'avoir utilise nos services."));
@@ -74,16 +74,5 @@ public class ServiceReservation extends Service {
         try {
             this.getClient().close();
         } catch (IOException ignored) {}
-    }
-
-    public static int numIsCorrect(String str) {
-        try {
-            int n = Integer.parseInt(str);
-            if (n < 1)
-                throw new NumberFormatException();
-            return n;
-        } catch (NumberFormatException e) {
-            return -1;
-        }
     }
 }

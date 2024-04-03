@@ -97,7 +97,7 @@ public class ServiceEmpruntRetour extends Service {
         out.println(Codage.coder(line));
         line = Codage.decoder(in.readLine());
 
-        while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.AbboneExiste(numeroAdherent)){
+        while ((numeroAdherent = ServiceUtils.numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)){
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
@@ -109,7 +109,7 @@ public class ServiceEmpruntRetour extends Service {
         StringBuilder sb = new StringBuilder();
         boolean empty = true;
         for (IDocument doc : Data.getReservations().keySet()) {
-            if (Data.adherentAReserver(doc, abonne)) {
+            if (Data.adherentAReserve(doc, abonne)) {
                 if (empty) {
                     empty = false;
                     sb.append("Liste des documents reserves : \n");
@@ -134,13 +134,13 @@ public class ServiceEmpruntRetour extends Service {
 
         IDocument document = Data.getDocument(numDocument);
         System.out.println(document.getNumero());
-        if (document == null) {
+        if (document == null)
             out.print(Codage.coder("Le document n'existe pas.\n"));
-        } else if (Data.estReserver(document) && !Data.adherentAReserver(document, abonne)) {
+        else if (Data.estReserve(document) && !Data.adherentAReserve(document, abonne))
             out.print(Codage.coder("Le document est reserve par une autre personne.\n"));
-        } else if (Data.estEmprunter(document)) {
+        else if (Data.estEmprunte(document))
             out.print(Codage.coder("Le document est deja emprunte.\n"));
-        } else if (!Data.AbonnePeutEmprunter(document, abonne)) {
+        else if (Data.abonnePeutPasEmprunterDVD(document, abonne))
             out.print(Codage.coder("Le DVD est pour personne majeur\n"));
         } else {
             out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant? (Oui/Non)\n" + document.toString()));

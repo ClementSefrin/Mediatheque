@@ -2,7 +2,6 @@ package app;
 
 import doc.Abonne;
 import doc.Document;
-import doc.EmpruntException;
 import doc.types.DVD;
 import doc.types.Livre;
 
@@ -15,10 +14,10 @@ public class Data implements Runnable {
     private static final String USER = "Admin";
     private static final String PASS = "Admin";
 
-    private static LinkedList<Document> documents = new LinkedList<>();
-    private static LinkedList<Abonne> abonnes = new LinkedList<>();
-    private static HashMap<Document, Abonne> reservations = new HashMap<>();
-  //  private static HashMap<Document, Abonne> emprunts = new HashMap<>();
+    private static final LinkedList<Document> documents = new LinkedList<>();
+    private static final LinkedList<Abonne> abonnes = new LinkedList<>();
+    private static final HashMap<Document, Abonne> reservations = new HashMap<>();
+    // private static HashMap<Document, Abonne> emprunts = new HashMap<>();
 
     @Override
     public void run() {
@@ -113,7 +112,7 @@ public class Data implements Runnable {
     }
 
 
-    public static Document getDocumentAbbonne(Abonne a) {
+    public static Document getDocumentAbonne(Abonne a) {
         for (Document d : documents) {
             if (d.emprunteur() != null && d.emprunteur().equals(a)) {
                 return d;
@@ -139,11 +138,12 @@ public static boolean emprunt(Document d, Abonne a) {
     public static boolean retour(Document d) {
         if(reservations.containsKey(d)){
             reservations.remove(d);
+            // return true; ????
         }
         return false;
     }
 
-    public static String AbonneAEmpreunter(Abonne a) {
+    public static String abonneAEmprunte(Abonne a) {
         StringBuilder sb = new StringBuilder();
         for (Document d : reservations.keySet()) {
             if (reservations.get(d).equals(a)) {
@@ -153,7 +153,7 @@ public static boolean emprunt(Document d, Abonne a) {
         return sb.toString();
     }
 
-    public static String NomAbonne(int numero) {
+    public static String nomAbonne(int numero) {
         for (Abonne a : abonnes) {
             if (a.getNumero() == numero) {
                 return a.getNom();
@@ -162,18 +162,12 @@ public static boolean emprunt(Document d, Abonne a) {
         return null;
     }
 
-    public static boolean estEmprunter(Document d) {
-        if(d.emprunteur() == null){
-            return true;
-        }
-        return false;
+    public static boolean estEmprunte(Document d) {
+        return d.emprunteur() == null;
     }
 
-    public static boolean empruntOuReserver(Document d) {
-        if(d.emprunteur() != null || d.reserveur() != null){
-            return true;
-        }
-        return false;
+    public static boolean empruntOuReservation(Document d) {
+        return d.emprunteur() != null || d.reserveur() != null;
     }
 
     public static void reserver(Document d, Abonne a) {
@@ -182,11 +176,11 @@ public static boolean emprunt(Document d, Abonne a) {
         }
     }
 
-    public static boolean estReserver(Document d) {
+    public static boolean estReserve(Document d) {
         return reservations.containsKey(d);
     }
 
-    public static boolean adherentAReserver(Document d, Abonne a) {
+    public static boolean adherentAReserve(Document d, Abonne a) {
         return reservations.get(d).equals(a);
     }
 
@@ -201,14 +195,11 @@ public static boolean emprunt(Document d, Abonne a) {
         return false;
     }
 
-    public static boolean AbonnePeutPasEmprunterDVD(IDocument d, Abonne a) {
-        if (DVDPourMajeur(d) && !a.estMajeur()) {
-            return false;
-        }
-        return true;
+    public static boolean abonnePeutPasEmprunterDVD(IDocument d, Abonne a) {
+        return !DVDPourMajeur(d) || a.estMajeur();
     }
 
-    public static boolean AbboneExiste(int numero) {
+    public static boolean abonneExiste(int numero) {
         for (Abonne a : abonnes) {
             if (a.getNumero() == numero) {
                 return true;

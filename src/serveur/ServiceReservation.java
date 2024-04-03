@@ -72,7 +72,7 @@ public class ServiceReservation extends Service {
                 //TODO : Le document est disponible ?
 
                 out.println(Codage.coder("Voulez-vous continuer ? (y/n)"));
-                continuer = in.readLine().equalsIgnoreCase("y") ? true : false;
+                continuer = in.readLine().equalsIgnoreCase("y");
             }
 
             out.println(Codage.coder("Connexion terminee. Merci d'avoir utilise nos services."));

@@ -60,8 +60,8 @@ public class Document implements IDocument {
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {
         synchronized (this) {
-            if(this instanceof DVD && !Data.AbonnePeutPasEmprunterDVD(this, ab)){
-                throw new EmpruntException("Désole, vous ne pouvez pas emprunter ce DVD, car vous êtes mineurs.");
+            if(this instanceof DVD && !Data.abonnePeutPasEmprunterDVD(this, ab)){
+                throw new EmpruntException("Desole, vous ne pouvez pas emprunter ce DVD, car vous êtes mineur.");
             }
             if (empruntePar == null && reservePar == null) {
                 if(Data.emprunt(this, ab)) {
@@ -70,7 +70,7 @@ public class Document implements IDocument {
                     Data.ajoutEmprunt(this, ab);
                 }
             } else {
-                throw new EmpruntException("Le document est déjà réservé ou emprunté.");
+                throw new EmpruntException("Le document est deja reserve ou emprunte.");
             }
 
         }

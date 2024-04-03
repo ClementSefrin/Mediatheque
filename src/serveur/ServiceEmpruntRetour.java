@@ -131,7 +131,7 @@ public class ServiceEmpruntRetour extends Service {
         try {
             assert document != null;
             document.empruntPar(abonne);
-            out.print(Codage.coder("Emprunt effectue avec succes.\n"));
+            out.print(Codage.coder("Emprunt effectue avec succes. Vous avez emprunte : " + document.getTitre() + "\n"));
         } catch (EmpruntException e) {
             out.print(Codage.coder( e + "\n"));
             out.flush();

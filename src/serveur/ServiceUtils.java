@@ -8,8 +8,12 @@ import java.net.Socket;
 
 public class ServiceUtils {
 
-    public static boolean checkConnectionStatus(String str) {
-        return str.equalsIgnoreCase("quit");
+    public static void checkConnectionStatus(String str, Socket client, PrintWriter out) throws IOException {
+        if (str.equalsIgnoreCase("quit")){
+            try {
+                endConnection(client, out);
+            } catch (IOException ignored) {}
+        }
     }
 
     public static void endConnection(Socket client, PrintWriter out) throws IOException {

@@ -12,10 +12,10 @@ public class Data implements Runnable {
     private static final String USER = "Admin";
     private static final String PASS = "Admin";
 
-    private static LinkedList<IDocument> documents = new LinkedList<>();
-    private static LinkedList<Abonne> abonnes = new LinkedList<>();
-    private static HashMap<IDocument, Abonne> reservations = new HashMap<>();
-    private static HashMap<IDocument, Abonne> emprunts = new HashMap<>();
+    private static final LinkedList<IDocument> documents = new LinkedList<>();
+    private static final LinkedList<Abonne> abonnes = new LinkedList<>();
+    private static final HashMap<IDocument, Abonne> reservations = new HashMap<>();
+    // private static HashMap<IDocument, Abonne> emprunts = new HashMap<>();
 
     @Override
     public void run() {
@@ -71,7 +71,6 @@ public class Data implements Runnable {
                 reservations.put(getDocument(i), getAbonne(1));
             }
 
-
         } catch (ClassNotFoundException e1) {
             System.err.print("ClassNotFoundException: ");
             System.err.println(e1.getMessage());
@@ -88,10 +87,6 @@ public class Data implements Runnable {
         return abonnes;
     }
 
-    public static HashMap<IDocument, Abonne> getEmprunts() {
-        return emprunts;
-    }
-
     public static HashMap<IDocument, Abonne> getReservations() {
         return reservations;
     }
@@ -106,6 +101,7 @@ public class Data implements Runnable {
     }
 
     public static IDocument getDocument(int numero) {
+
         for (IDocument d : documents) {
             if (d.getNumero() == numero) {
                 return d;
@@ -114,7 +110,33 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static String NomAbonne(int numero) {
+
+    public static IDocument getDocumentAbonne(Abonne a) {
+        for (IDocument d : documents) {
+            if (d.emprunteur() != null && d.emprunteur().equals(a)) {
+                return d;
+            }
+        }
+        return null;
+    }
+;
+    public static void emprunt(IDocument d, Abonne a) {
+        d.empruntPar(a);
+    }
+
+    public static void retour(IDocument d) {
+        d.retour();
+    }
+
+    public static boolean estEmprunte(IDocument d) {
+        return d.emprunteur() != null;
+    }
+
+    public static boolean estReserve(IDocument d) {
+        return d.emprunteur() == null;
+    }
+
+    public static String nomAbonne(int numero) {
         for (Abonne a : abonnes) {
             if (a.getNumero() == numero) {
                 return a.getNom();
@@ -123,47 +145,31 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static boolean estEmprunter(IDocument d) {
-        return emprunts.containsKey(d);
-    }
-
-    public static void retour(IDocument d) {
-        synchronized (emprunts) {
-            emprunts.remove(d);
-        }
-    }
-
     public static void reserver(IDocument d, Abonne a) {
-        synchronized (reservations) {
+        synchronized (reservations){
             reservations.put(d, a);
         }
     }
 
-    public static boolean estReserver(IDocument d) {
-        return reservations.containsKey(d);
-    }
-
-    public static void emprunter(IDocument d, Abonne a) {
-        synchronized (emprunts) {
-            emprunts.put(d, a);
-        }
-    }
-
-    public static boolean adherentAReserver(IDocument d, Abonne a) {
-        return reservations.get(d).equals(a);
+    public static boolean adherentAReserve(IDocument d, Abonne a) {
+        return d.reserveur().equals(a);
     }
 
     public static void retirerReservation(IDocument d) {
-        synchronized (reservations) {
-            reservations.remove(d);
-        }
+        d.reservationPour(null);
     }
 
-    public static boolean AbonnePeutEmprunter(IDocument d, Abonne a) {
-        return !(d instanceof DVD && ((DVD) d).estAdulte() && !a.estMajeur());
+    public static boolean DVDPourMajeur(IDocument d) {
+        if (d instanceof DVD)
+            return ((DVD) d).estAdulte();
+        return false;
     }
 
-    public static boolean AbboneExiste(int numero) {
+    public static boolean abonnePeutPasEmprunterDVD(IDocument d, Abonne a) {
+        return DVDPourMajeur(d) && !a.estMajeur();
+    }
+
+    public static boolean abonneExiste(int numero) {
         for (Abonne a : abonnes) {
             if (a.getNumero() == numero) {
                 return true;

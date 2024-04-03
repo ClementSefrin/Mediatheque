@@ -63,13 +63,8 @@ public class Document implements IDocument {
 
     @Override
     public void retour() {
-        if (empruntePar != null) {
-            //TODO: envoyer le retour à la BD
             empruntePar = null;
-        } else if (reservePar != null) {
-            // TODO: envoyer le retour à la BD
             reservePar = null;
-        }
     }
 
     @Override

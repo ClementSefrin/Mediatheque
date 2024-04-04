@@ -64,7 +64,7 @@ public class ServiceEmpruntRetour extends Service {
         }
     }
 
-    private void retour(BufferedReader in, PrintWriter out) throws IOException {
+    private void retour(BufferedReader in, PrintWriter out) throws IOException, EmpruntException {
         int numDoc;
         String line = "Entrez le numero du document que vous voulez retouner : ";
         out.println(Codage.coder(line));
@@ -89,80 +89,60 @@ public class ServiceEmpruntRetour extends Service {
     }
 
 
-    private void emprunt(int numeroAdherent, BufferedReader in, PrintWriter out) throws IOException {
-        String line = "Saisissez votre numero d'adherent : ";
-        out.println(Codage.coder(line));
-        line = Codage.decoder(in.readLine());
-        ServiceUtils.checkConnectionStatus(line, getClient(), out);
+    private int emprunt(int numeroAdherent, BufferedReader in, PrintWriter out, boolean premierPassage)
+            throws IOException, EmpruntException, InterruptedException {
+        String line;
 
-        while ((numeroAdherent = ServiceUtils.numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)){
-            line = "Veuillez entrer un numero valide.";
-            out.println(Codage.coder(line));
+        if (premierPassage) {
+            out.println(Codage.coder("Veuillez entrer votre numero d'adherent : "));
             line = Codage.decoder(in.readLine());
-            ServiceUtils.checkConnectionStatus(line, getClient(), out);
+            while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)) {
+                line = "Veuillez entrer un numero valide.";
+                out.println(Codage.coder(line));
+                line = Codage.decoder(in.readLine());
+            }
+            numeroAdherent = Integer.parseInt(line);
         }
 
         Abonne abonne = Data.getAbonne(numeroAdherent);
-
-        LinkedList<IDocument> documentsReserves = new LinkedList<>();
         StringBuilder sb = new StringBuilder();
-        boolean empty = true;
-        for (IDocument doc : Data.getReservations().keySet()) {
-            if (Data.adherentAReserve(doc, abonne)) {
-                if (empty) {
-                    empty = false;
-                    sb.append("Liste des documents reserves : \n");
-                }
-                documentsReserves.add(doc);
-                sb.append("\t" + doc.toString() + "\n");
-            }
-        }
-
-        if (empty)
+        if (Data.afficherDocumentsEmpruntes(abonne).isEmpty())
             sb.append("Vous n'avez aucun document reserve.\n");
-        sb.append("Entrez le numero du document que vous voulez emprunter : ");
+        else
+            sb.append("Vous avez un document reserve.\n").append(Data.afficherDocumentsEmpruntes(abonne)).append("\n");
+        assert abonne != null;
+        sb.append(abonne.getNom()).append(" entrez le numero du document que vous voulez emprunter : ");
         out.println(Codage.coder(sb.toString()));
 
         int numDocument;
         line = Codage.decoder(in.readLine());
-        ServiceUtils.checkConnectionStatus(line, getClient(), out);
-        while ((numDocument = ServiceUtils.numIsCorrect(line)) == -1) {
+        while ((numDocument = numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
-            ServiceUtils.checkConnectionStatus(line, getClient(), out);
         }
 
-        IDocument document = Data.getDocument(numDocument);
-        if (document == null)
-            out.print(Codage.coder("Le document n'existe pas.\n"));
-        else if (Data.estReserve(document) && !Data.adherentAReserve(document, abonne))
-            out.print(Codage.coder("Le document est reserve par une autre personne.\n"));
-        else if (Data.estEmprunte(document))
-            out.print(Codage.coder("Le document est deja emprunte.\n"));
-        else if (Data.abonnePeutPasEmprunterDVD(document, abonne))
-            out.print(Codage.coder("Le DVD est pour personne majeur\n"));
-        else {
-            synchronized (document) {
-                out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant? (Oui/Non)\n" + document.toString()));
-                line = Codage.decoder(in.readLine());
-                ServiceUtils.checkConnectionStatus(line, getClient(), out);
+        Document document = (Document) Data.getDocument(numDocument);
 
-                while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
-                    line = "Veuillez entrer une réponse valide.";
-                    out.println(Codage.coder(line));
-                    line = Codage.decoder(in.readLine());
-                    ServiceUtils.checkConnectionStatus(line, getClient(), out);
-                }
+        try {
+            assert document != null;
+            document.empruntPar(abonne);
+            out.print(Codage.coder("Emprunt effectue avec succes. Vous avez emprunte : " + document.getTitre() + "\n"));
+        } catch (EmpruntException e) {
+            out.print(Codage.coder( e + "\n"));
+            out.flush();
+            return numeroAdherent;
+        }
+        return numeroAdherent;
+    }
 
-                if (line.equalsIgnoreCase("oui")) {
-                    Data.emprunt(document, abonne);
-                    out.print(Codage.coder("Emprunt effectue avec succes.\n"));
-                } else {
-                    out.print(Codage.coder("Emprunt annule.\n"));
-                }
-            }
-
+    public static int numIsCorrect(String str) {
+        try {
+            int n = Integer.parseInt(str);
+            if (n < 1) throw new NumberFormatException();
+            return n;
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 }

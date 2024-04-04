@@ -1,8 +1,9 @@
 package serveur;
 
 import app.IDocument;
-import codage.Codage;
 import app.Data;
+import bttp3.AudioPlayer;
+import codage.Codage;
 import doc.Abonne;
 import timer.AnnulerReservationTask;
 
@@ -47,21 +48,32 @@ public class ServiceReservation extends Service {
                 out.println(Codage.coder("Que voulez-vous reserver, " + abonne.getNom() + " ? > "));
                 int numDocs = Integer.parseInt(in.readLine());
 
-                IDocument doc = Data.getDocument(numDocs - 1);
+                IDocument doc = Data.getDocument(numDocs);
                 String message;
                 if (doc == null)
                     message = "Ce document n'existe pas.";
                 else {
-                    if (Data.estReserve(doc) || Data.estEmprunte(doc))
-                        message = "Ce document est deja reserve ou emprunte.";
+                    if (Data.estReserve(doc) || Data.estEmprunte(doc)) {
+                        if (true) { // TODO :  Trouver un moyen de connaître le temps restant
+                            AudioPlayer.playAudio("../musique/waiting_song.mp3"); // TODO : ne fonctionne pas
+                            // Faire patienter le client (30 sec)
+                            Thread.sleep(30_000);
+                            AudioPlayer.stopAudio();
+
+                            if (Data.estReserve(doc)) {
+                                message = "Envoûtement vaincu ! ";
+                                break;
+                            } else message = "L'envoûtement était trop fort ! Vous avez manqué le document.";
+                        } else message = "Ce document est deja reserve ou emprunte.";
+                    }
                     else {
                         if(Data.abonnePeutPasEmprunterDVD(doc, abonne)){
                             message = "Le document est reserve aux personnes majeures";
                         }
                         else {
                             Data.reserver(doc,abonne);
-                            System.out.println(Data.adherentAReserve(doc,abonne)); // Test
-                            timer.schedule(new AnnulerReservationTask(doc, timer), 20_000);
+                            System.out.println(Data.adherentAReserve(doc, abonne)); // TODO : à tester
+                            timer.schedule(new AnnulerReservationTask(doc, timer), 120_000); // 2min = 2h
                             message = "Vous avez bien reserve " + doc + "\n";
                         }
                     }
@@ -71,7 +83,7 @@ public class ServiceReservation extends Service {
             }
 
             out.println(Codage.coder("Connexion terminee. Merci d'avoir utilise nos services."));
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             System.err.println("Client deconnecte ?");
             try {
                 this.getClient().close();

@@ -124,8 +124,16 @@ public class Data implements Runnable {
         d.empruntPar(a);
     }
 
-    public static void retour(IDocument d) {
-        d.retour();
+    public static void retour(Document d) {
+        synchronized (documentsEmpruntes) {
+            for (Map.Entry<HashMap<IDocument, Abonne>, LocalDateTime> entry : documentsEmpruntes.entrySet()) {
+                HashMap<IDocument, Abonne> documentAbonneMap = entry.getKey();
+                if (documentAbonneMap.containsKey(d)) {
+                    documentsEmpruntes.remove(documentAbonneMap);
+                    return;
+                }
+            }
+        }
     }
 
     public static boolean estEmprunte(IDocument d) {
@@ -155,7 +163,7 @@ public class Data implements Runnable {
         return d.reserveur()!= null && d.reserveur().equals(a);
     }
 
-    public static void retirerReservation(IDocument d) {
+    public static void retirerReservation(IDocument d) throws EmpruntException {
         d.reservationPour(null);
     }
 

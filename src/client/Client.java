@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Client {
-    private final static int PORT = 4000;
+    private final static int PORT = 3000;
     private final static String HOST = "localhost";
 
     public static void main(String[] args) {

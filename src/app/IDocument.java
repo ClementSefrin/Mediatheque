@@ -17,6 +17,6 @@ public interface IDocument {
     void empruntPar(Abonne ab);
 
     // retour d’un document ou annulation d'une réservation
-    void retour();
+    void retour() throws EmpruntException;
 
 }

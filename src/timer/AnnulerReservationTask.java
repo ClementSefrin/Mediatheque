@@ -2,6 +2,7 @@ package timer;
 
 import app.Data;
 import app.IDocument;
+import doc.EmpruntException;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,7 +19,11 @@ public class AnnulerReservationTask extends TimerTask {
     @Override
     public void run() {
         timer.cancel();
-        Data.retirerReservation(document);
+        try {
+            Data.retirerReservation(document);
+        } catch (EmpruntException e) {
+            throw new RuntimeException(e);
+        }
         System.out.println("La réservation du document " + document + " a été retirée");
     }
 }

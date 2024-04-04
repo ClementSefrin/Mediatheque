@@ -6,12 +6,13 @@ import serveur.ServiceEmpruntRetour;
 import serveur.ServiceReservation;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.util.Timer;
 
 
 public class Appli {
-
     public static void main(String[] args) {
-
+        Timer timer = new Timer(); // TODO : mettre le timer en commun
         new Thread(new Data()).start();
 
         Class<? extends Service> service = null;
@@ -27,7 +28,6 @@ public class Appli {
 
         if (service != null) {
             try {
-
                 new Thread(new Serveur(service, port)).start();
                 System.out.println("Serveur lance avec succes sur le port " + port);
             } catch (IOException e) {

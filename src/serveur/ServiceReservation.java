@@ -4,14 +4,19 @@ import app.IDocument;
 import codage.Codage;
 import app.Data;
 import doc.Abonne;
+import timer.AnnulerReservationTask;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ServiceReservation extends Service {
+    private Timer timer = new Timer(); // TODO : mettre en partagé
+    private TimerTask annulerReservationTask;
     public ServiceReservation(Socket socket) {
         super(socket);
     }
@@ -56,6 +61,7 @@ public class ServiceReservation extends Service {
                         else {
                             Data.reserver(doc,abonne);
                             System.out.println(Data.adherentAReserve(doc,abonne)); // Test
+                            timer.schedule(new AnnulerReservationTask(doc, timer), 20_000);
                             message = "Vous avez bien reserve " + doc + "\n";
                         }
                     }

@@ -36,7 +36,7 @@ public class Client {
                 }
                 sout.println(Codage.coder(outLine));
             }
-            System.err.println("Fin de la connexion. Merci d'avoir utilisé nos services.");
+            System.err.println("Fin de la connexion. Merci d'avoir utilise nos services.");
             socket.close();
         } catch (IOException e) {
             System.err.println(e);

@@ -15,8 +15,8 @@ import java.net.Socket;
 import java.util.LinkedList;
 
 public class ServiceEmpruntRetour extends Service {
-    private Abonne abonne;
-
+    private boolean premierPassage = true;
+    private int numeroAdherent = -1;
     public ServiceEmpruntRetour(Socket socket) {
         super(socket);
     }
@@ -28,8 +28,6 @@ public class ServiceEmpruntRetour extends Service {
             PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
             boolean quit = false;
             String line = "";
-            boolean premierPassage = true;
-            int numeroAdherent = -1;
             while (!quit) {
                 String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
                 out.println(Codage.coder(demandeService));
@@ -41,14 +39,13 @@ public class ServiceEmpruntRetour extends Service {
                 }
 
                 if (line.equalsIgnoreCase("Emprunt"))
-                    numeroAdherent = emprunt(numeroAdherent, in, out, premierPassage);
+                    numeroAdherent = emprunt(numeroAdherent, in, out);
                 else if (line.equalsIgnoreCase("Retour"))
                     retour(in, out);
                 line = "Vouler-vous continuer? (Oui/Non)";
                 out.println(Codage.coder(line));
                 if(quit = Codage.decoder(in.readLine()).equalsIgnoreCase("oui")){
                     quit = false;
-                    premierPassage = false;
                 }
                 else {
                     quit = true;
@@ -70,12 +67,12 @@ public class ServiceEmpruntRetour extends Service {
         String line = "Entrez le numero du document que vous voulez retouner : ";
         out.println(Codage.coder(line));
         line = Codage.decoder(in.readLine());
-        ServiceUtils.checkConnectionStatus(line, getClient(), out);
+      //  ServiceUtils.checkConnectionStatus(line, getClient(), out);
         while ((numDoc = ServiceUtils.numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
-            ServiceUtils.checkConnectionStatus(line, getClient(), out);
+           // ServiceUtils.checkConnectionStatus(line, getClient(), out);
         }
 
         Document document = (Document) Data.getDocument(numDoc);
@@ -86,7 +83,7 @@ public class ServiceEmpruntRetour extends Service {
             return;
         }
 
-        if (Data.estEmprunte(document)) {
+        if (Data.estEmpruntee(document)) {
             document.retour();
             out.print(Codage.coder("Le document a bien ete retourne.\n"));
         }
@@ -96,23 +93,24 @@ public class ServiceEmpruntRetour extends Service {
     }
 
 
-    private int emprunt(int numeroAdherent, BufferedReader in, PrintWriter out, boolean premierPassage)
+    private int emprunt(int numeroAdherent, BufferedReader in, PrintWriter out)
             throws IOException, EmpruntException, InterruptedException {
         String line;
-
         if (premierPassage) {
             out.println(Codage.coder("Veuillez entrer votre numero d'adherent : "));
             line = Codage.decoder(in.readLine());
-            while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)) {
+            while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.AbboneExiste(numeroAdherent)) {
                 line = "Veuillez entrer un numero valide.";
                 out.println(Codage.coder(line));
                 line = Codage.decoder(in.readLine());
             }
+            premierPassage = false;
             numeroAdherent = Integer.parseInt(line);
         }
 
         Abonne abonne = Data.getAbonne(numeroAdherent);
         StringBuilder sb = new StringBuilder();
+
         if (Data.afficherDocumentsEmpruntes(abonne).isEmpty())
             sb.append("Vous n'avez aucun document reserve.\n");
         else
@@ -130,6 +128,13 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         Document document = (Document) Data.getDocument(numDocument);
+        while (!Data.documentExiste(document)) {
+            line = "Veuillez entrer un numero valide.";
+            out.println(Codage.coder(line));
+            line = Codage.decoder(in.readLine());
+            numDocument = numIsCorrect(line);
+            document = (Document) Data.getDocument(numDocument);
+        }
 
         try {
             assert document != null;

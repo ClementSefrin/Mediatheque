@@ -146,8 +146,34 @@ public class Data implements Runnable {
         }
     }
 
+    public static boolean AbboneExiste(int numero) {
+        for (Abonne a : abonnes) {
+            if (a.getNumero() == numero) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean documentExiste(IDocument d) {
+        if(documents.contains(d)){
+            return true;
+        }
+        return false;
+    }
+
     public static boolean estEmprunte(IDocument d) {
         return d.emprunteur() != null;
+    }
+
+    public static boolean estEmpruntee(Document d) {
+        for (Map.Entry<HashMap<IDocument, Abonne>, LocalDateTime> entry : documentsEmpruntes.entrySet()) {
+            HashMap<IDocument, Abonne> documentAbonneMap = entry.getKey();
+            if (documentAbonneMap.containsKey(d)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean estReserve(IDocument d) {
@@ -165,9 +191,9 @@ public class Data implements Runnable {
 
     public static boolean empruntOuReservation(Document d) {
         if(documentsEmpruntes.containsKey(d) || reservations.containsKey(d)){
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     public static String afficherDocumentsEmpruntes(Abonne abonne) {

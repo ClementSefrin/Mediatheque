@@ -64,7 +64,7 @@ public class Document implements IDocument {
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {
         synchronized (this) {
-            if(this instanceof DVD && !Data.abonnePeutPasEmprunterDVD(this, ab)){
+            if(this instanceof DVD && Data.abonnePeutPasEmprunterDVD(this, ab)){
                 throw new EmpruntException("Desole, vous ne pouvez pas emprunter ce DVD, car vous êtes mineur.");
             }
             if (empruntePar == null && reservePar == null) {

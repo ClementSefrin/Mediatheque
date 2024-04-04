@@ -4,6 +4,8 @@ import app.IDocument;
 import codage.Codage;
 import app.Data;
 import doc.Abonne;
+import doc.Document;
+import doc.EmpruntException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,43 +26,42 @@ public class ServiceEmpruntRetour extends Service {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
             PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
-            String line = "";
-            int numeroAdherent = -1;
             boolean quit = false;
+            String line = "";
+            boolean premierPassage = true;
+            int numeroAdherent = -1;
             while (!quit) {
                 String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
                 out.println(Codage.coder(demandeService));
-
                 line = Codage.decoder(in.readLine());
-                ServiceUtils.checkConnectionStatus(line, getClient(), out);
 
                 while (!line.equalsIgnoreCase("Emprunt") && !line.equalsIgnoreCase("Retour")) {
                     out.println(Codage.coder("Ce service n'est pas disponible. \n" + demandeService));
                     line = Codage.decoder(in.readLine());
-                    ServiceUtils.checkConnectionStatus(line, getClient(), out);
                 }
 
-                if (line.equalsIgnoreCase("Emprunt")) {
-                    emprunt(numeroAdherent, in, out);
-                } else if (line.equalsIgnoreCase("Retour")) {
+                if (line.equalsIgnoreCase("Emprunt"))
+                    numeroAdherent = emprunt(numeroAdherent, in, out, premierPassage);
+                else if (line.equalsIgnoreCase("Retour"))
                     retour(in, out);
-                }
                 line = "Vouler-vous continuer? (Oui/Non)";
                 out.println(Codage.coder(line));
-                line = Codage.decoder(in.readLine());
-                ServiceUtils.checkConnectionStatus(line, getClient(), out);
-                while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
-                    line = "Veuillez entrer une réponse valide.";
-                    out.println(Codage.coder(line));
-                    line = Codage.decoder(in.readLine());
-                    ServiceUtils.checkConnectionStatus(line, getClient(), out);
+                if(quit = Codage.decoder(in.readLine()).equalsIgnoreCase("oui")){
+                    quit = false;
+                    premierPassage = false;
                 }
-                quit = Codage.decoder(line).equalsIgnoreCase("non");
+                else {
+                    quit = true;
+                    premierPassage = true;
+                }
             }
 
-            ServiceUtils.endConnection(getClient(), out);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            line = "Connexion terminee. Merci d'avoir utilise nos services.";
+            out.println(Codage.coder(line));
+            System.err.println("Un client a termine la connexion.");
+            getClient().close();
+        } catch (IOException | EmpruntException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -77,13 +78,19 @@ public class ServiceEmpruntRetour extends Service {
             ServiceUtils.checkConnectionStatus(line, getClient(), out);
         }
 
-        IDocument document = Data.getDocument(numDoc);
-        if (document == null) {
-            out.print(Codage.coder("Le document n'existe pas.\n"));
-        } else if (Data.estEmprunte(document)) {
-            Data.retour(document);
+        Document document = (Document) Data.getDocument(numDoc);
+
+        assert document != null;
+        if(Data.empruntOuReservation(document)){
+            out.print(Codage.coder("Le document n'est pas emprunter ou reserve\n"));
+            return;
+        }
+
+        if (Data.estEmprunte(document)) {
+            document.retour();
             out.print(Codage.coder("Le document a bien ete retourne.\n"));
-        } else {
+        }
+        else{
             out.print(Codage.coder("Le document n'est pas emprunte.\n"));
         }
     }

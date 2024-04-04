@@ -6,6 +6,10 @@ import doc.types.*;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.*;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Data implements Runnable {
     private static final String DB_URL = "jdbc:mariadb://194.164.50.105:3306/MediaTech";
@@ -15,6 +19,7 @@ public class Data implements Runnable {
     private static final LinkedList<IDocument> documents = new LinkedList<>();
     private static final LinkedList<Abonne> abonnes = new LinkedList<>();
     private static final HashMap<IDocument, Abonne> reservations = new HashMap<>();
+    private static final HashMap<HashMap<IDocument,Abonne>, LocalDateTime> documentsEmpruntes = new HashMap<>();
     // private static HashMap<IDocument, Abonne> emprunts = new HashMap<>();
 
     @Override
@@ -119,9 +124,14 @@ public class Data implements Runnable {
         }
         return null;
     }
-;
-    public static void emprunt(IDocument d, Abonne a) {
-        d.empruntPar(a);
+
+    public static void ajoutEmprunt(Document d, Abonne a) {
+        synchronized (documentsEmpruntes) {
+            HashMap<IDocument,Abonne> emprunt = new HashMap<>();
+            emprunt.put(d,a);
+            LocalDateTime aujourdHui = LocalDateTime.now();
+            documentsEmpruntes.put(emprunt, aujourdHui);
+        }
     }
 
     public static void retour(Document d) {
@@ -153,11 +163,59 @@ public class Data implements Runnable {
         return null;
     }
 
+    public static boolean empruntOuReservation(Document d) {
+        if(documentsEmpruntes.containsKey(d) || reservations.containsKey(d)){
+            return true;
+        }
+        return false;
+    }
+
+    public static String afficherDocumentsEmpruntes(Abonne abonne) {
+        StringBuilder stringBuilder = new StringBuilder();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        for (Map.Entry<HashMap<IDocument, Abonne>, LocalDateTime> entry : documentsEmpruntes.entrySet()) {
+            HashMap<IDocument, Abonne> documentAbonneMap = entry.getKey();
+            LocalDateTime dateEmprunt = entry.getValue();
+
+            for (Map.Entry<IDocument, Abonne> innerEntry : documentAbonneMap.entrySet()) {
+                IDocument document = innerEntry.getKey();
+                Abonne abonneEmprunteur = innerEntry.getValue();
+
+                if (abonneEmprunteur.equals(abonne)) {
+                    String formattedDate = dateEmprunt.format(formatter);
+                    stringBuilder.append("Titre du document: ").append(document.getTitre()).append(", Date d'emprunt: ").append(formattedDate).append("\n");
+                }
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+
     public static void reserver(IDocument d, Abonne a) {
         synchronized (reservations){
             reservations.put(d, a);
         }
     }
+
+
+    public static String abonneAEmprunte(Abonne a) {
+        StringBuilder sb = new StringBuilder();
+        for (IDocument d : reservations.keySet()) {
+            if (reservations.get(d).equals(a)) {
+                //sb.append(d.getTitre()).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+    public static boolean emprunt(Document d, Abonne a){
+        if(documentsEmpruntes.containsKey(d)){
+            documentsEmpruntes.remove(d);
+            return false;
+        }
+        return true;
+    }
+
 
     public static boolean adherentAReserve(IDocument d, Abonne a) {
         return d.reserveur()!= null && d.reserveur().equals(a);

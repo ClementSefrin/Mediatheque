@@ -2,6 +2,7 @@ package doc;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Abonne {
     private final int numero;
@@ -30,4 +31,11 @@ public class Abonne {
         return aujourdHui.minusYears(AGE_MAJEUR).isAfter(dateNaiss);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Abonne abonne = (Abonne) o;
+        return numero == abonne.numero && Objects.equals(nom, abonne.nom) && Objects.equals(dateNaissance, abonne.dateNaissance);
+    }
 }

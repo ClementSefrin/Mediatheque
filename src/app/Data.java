@@ -133,7 +133,7 @@ public class Data implements Runnable {
     }
 
     public static boolean estReserve(IDocument d) {
-        return d.emprunteur() == null;
+        return d.emprunteur() != null;
     }
 
     public static String nomAbonne(int numero) {
@@ -152,7 +152,7 @@ public class Data implements Runnable {
     }
 
     public static boolean adherentAReserve(IDocument d, Abonne a) {
-        return d.reserveur().equals(a);
+        return d.reserveur()!= null && d.reserveur().equals(a);
     }
 
     public static void retirerReservation(IDocument d) {

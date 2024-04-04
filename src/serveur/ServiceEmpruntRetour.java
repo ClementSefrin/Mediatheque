@@ -32,6 +32,7 @@ public class ServiceEmpruntRetour extends Service {
                 out.println(Codage.coder(demandeService));
 
                 line = Codage.decoder(in.readLine());
+                ServiceUtils.checkConnectionStatus(line, getClient(), out);
 
                 while (!line.equalsIgnoreCase("Emprunt") && !line.equalsIgnoreCase("Retour")) {
                     out.println(Codage.coder("Ce service n'est pas disponible. \n" + demandeService));
@@ -133,7 +134,6 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         IDocument document = Data.getDocument(numDocument);
-        System.out.println(document.getNumero());
         if (document == null)
             out.print(Codage.coder("Le document n'existe pas.\n"));
         else if (Data.estReserve(document) && !Data.adherentAReserve(document, abonne))

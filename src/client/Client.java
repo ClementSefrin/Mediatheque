@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Client {
-    private final static int PORT = 3000;
+    private final static int PORT = 4000;
     private final static String HOST = "localhost";
 
     public static void main(String[] args) {
@@ -25,27 +25,26 @@ public class Client {
 
             while (socket.isConnected()) {
                 inLine = sin.readLine();
-                if (inLine.equalsIgnoreCase("quit") || socket.isClosed()) {
+                if (inLine == null || (inLine != null && inLine.equalsIgnoreCase("quit"))) {
                     break;
                 }
                 System.out.println(Codage.decoder(inLine));
 
                 outLine = clavier.readLine();
-                if (outLine.equalsIgnoreCase("quit") || socket.isClosed()) {
+                sout.println(Codage.coder(outLine));
+                if (outLine.equalsIgnoreCase("quit")) {
                     break;
                 }
-                sout.println(Codage.coder(outLine));
             }
 
             System.err.println("Fin de la connexion. Merci d'avoir utilise nos services.");
-            socket.close();
         } catch (IOException e) {
             System.err.println(e);
-        }
+        }/*
         // Refermer dans tous les cas la socket
         try {
             if (socket != null) socket.close();
         } catch (IOException ignored) {
-        }
+        }*/
     }
 }

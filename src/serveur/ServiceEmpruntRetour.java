@@ -27,16 +27,18 @@ public class ServiceEmpruntRetour extends Service {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
             PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
-            boolean quit = false;
+            boolean continuer = true;
             String line = "";
-            while (!quit) {
+            while (continuer) {
                 String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
                 out.println(Codage.coder(demandeService));
                 line = Codage.decoder(in.readLine());
+                ServiceUtils.checkConnectionStatus(line, getClient());
 
                 while (!line.equalsIgnoreCase("Emprunt") && !line.equalsIgnoreCase("Retour")) {
                     out.println(Codage.coder("Ce service n'est pas disponible. \n" + demandeService));
                     line = Codage.decoder(in.readLine());
+                    ServiceUtils.checkConnectionStatus(line, getClient());
                 }
 
                 if (line.equalsIgnoreCase("Emprunt"))
@@ -45,26 +47,39 @@ public class ServiceEmpruntRetour extends Service {
                     retour(in, out);
                 line = "Vouler-vous continuer? (Oui/Non)";
                 out.println(Codage.coder(line));
-                quit = Codage.decoder(in.readLine()).equalsIgnoreCase("non");
+
+                line = Codage.decoder(in.readLine());
+                ServiceUtils.checkConnectionStatus(line, getClient());
+
+                while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
+                    line = "Veuillez entrer une réponse valide.";
+                    out.println(Codage.coder(line));
+                    line = Codage.decoder(in.readLine());
+                    ServiceUtils.checkConnectionStatus(line, getClient());
+                }
+
+                continuer = line.equalsIgnoreCase("oui");
             }
 
-            ServiceUtils.endConnection(getClient(), out);
+            ServiceUtils.endConnection(this.getClient());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        } catch (FinConnexionException e) {
+            System.err.println(e.getMessage());
         }
     }
 
-    private void retour(BufferedReader in, PrintWriter out) throws IOException {
+    private void retour(BufferedReader in, PrintWriter out) throws IOException, FinConnexionException {
         int numDoc;
         String line = "Entrez le numero du document que vous voulez retouner : ";
         out.println(Codage.coder(line));
         line = Codage.decoder(in.readLine());
-        // ServiceUtils.checkConnectionStatus(line, getClient(), out);
+        ServiceUtils.checkConnectionStatus(line, getClient());
         while ((numDoc = ServiceUtils.numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
-            // ServiceUtils.checkConnectionStatus(line, getClient(), out);
+            ServiceUtils.checkConnectionStatus(line, getClient());
         }
 
         IDocument document = Data.getDocument(numDoc);
@@ -73,16 +88,18 @@ public class ServiceEmpruntRetour extends Service {
     }
 
 
-    private void emprunt(BufferedReader in, PrintWriter out) throws IOException, InterruptedException {
+    private void emprunt(BufferedReader in, PrintWriter out) throws IOException, InterruptedException, FinConnexionException {
         String line;
         int numeroAdherent;
         if (abonne == null) {
             out.println(Codage.coder("Veuillez entrer votre numero d'adherent : "));
             line = Codage.decoder(in.readLine());
+            ServiceUtils.checkConnectionStatus(line, getClient());
             while ((numeroAdherent = ServiceUtils.numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)) {
                 line = "Veuillez entrer un numero valide.";
                 out.println(Codage.coder(line));
                 line = Codage.decoder(in.readLine());
+                ServiceUtils.checkConnectionStatus(line, getClient());
             }
             numeroAdherent = Integer.parseInt(line);
             abonne = Data.getAbonne(numeroAdherent);
@@ -95,10 +112,12 @@ public class ServiceEmpruntRetour extends Service {
 
         int numDocument;
         line = Codage.decoder(in.readLine());
+        ServiceUtils.checkConnectionStatus(line, getClient());
         while ((numDocument = ServiceUtils.numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
+            ServiceUtils.checkConnectionStatus(line, getClient());
         }
 
         Document document = (Document) Data.getDocument(numDocument);
@@ -106,15 +125,29 @@ public class ServiceEmpruntRetour extends Service {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
+            ServiceUtils.checkConnectionStatus(line, getClient());
             numDocument = ServiceUtils.numIsCorrect(line);
             document = (Document) Data.getDocument(numDocument);
         }
 
-        try {
-            document.empruntPar(abonne);
-            out.print(Codage.coder("Emprunt effectue avec succès."));
-        } catch (EmpruntException e) {
-            out.print(Codage.coder(e.getMessage()));
+        out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant? (Oui/Non)\n" + document.getTitre()));
+        line = Codage.decoder(in.readLine());
+        ServiceUtils.checkConnectionStatus(line, getClient());
+        while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
+            line = "Veuillez entrer une réponse valide.";
+            out.println(Codage.coder(line));
+            line = Codage.decoder(in.readLine());
+            ServiceUtils.checkConnectionStatus(line, getClient());
+        }
+        if (line.equalsIgnoreCase("oui")) {
+            try {
+                document.empruntPar(abonne);
+                out.print(Codage.coder("Emprunt effectue avec succès."));
+            } catch (EmpruntException e) {
+                out.print(Codage.coder(e.getMessage()));
+            }
+        } else {
+            out.print(Codage.coder("Emprunt annule."));
         }
         out.print(Codage.coder("\n"));
     }

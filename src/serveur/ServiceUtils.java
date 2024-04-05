@@ -8,19 +8,19 @@ import java.net.Socket;
 
 public class ServiceUtils {
 
-    public static void checkConnectionStatus(String str, Socket client, PrintWriter out) throws IOException {
-        if (str.equalsIgnoreCase("quit")){
-            try {
-                endConnection(client, out);
-            } catch (IOException ignored) {}
+    public static void checkConnectionStatus(String str,Socket client) throws FinConnexionException {
+        if (str.equalsIgnoreCase("quit")) {
+            endConnection(client);
         }
     }
 
-    public static void endConnection(Socket client, PrintWriter out) throws IOException {
-        String line = "Connexion terminee. Merci d'avoir utilise nos services.";
-        out.println(Codage.coder(line));
-        System.err.println("Un client a termine la connexion.");
-        client.close();
+    public static void endConnection(Socket client) throws FinConnexionException {
+        try {
+            client.close();
+        } catch (IOException e) {
+            throw new FinConnexionException("Connexion terminee.");
+        }
+        throw new FinConnexionException("Un client a termine la connexion.");
     }
 
     public static int numIsCorrect(String str) {

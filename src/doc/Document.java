@@ -4,10 +4,13 @@ import app.Data;
 import app.IDocument;
 import doc.types.DVD;
 
+import java.time.LocalDateTime;
+
 
 public class Document implements IDocument {
     private Abonne reservePar = null;
     private Abonne empruntePar = null;
+    private LocalDateTime dateEmprunt = null;
     private final int numero;
     private final String titre;
 
@@ -29,15 +32,15 @@ public class Document implements IDocument {
     }
 
     @Override
+    public LocalDateTime dateEmprunt() {
+        return dateEmprunt;
+    }
+
+    @Override
     public int numero() {
         return numero;
     }
 
-    @Override
-    public int getNumero() {
-        return this.numero;
-    }
-    
     @Override
     public String getTitre() {
         return titre;
@@ -55,7 +58,7 @@ public class Document implements IDocument {
     }
 
     @Override
-    public void reservationPour(Abonne ab) throws EmpruntException{
+    public void reservationPour(Abonne ab) throws EmpruntException {
         if (reservePar == null && empruntePar == null) {
             reservePar = ab;
         }
@@ -64,31 +67,27 @@ public class Document implements IDocument {
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {
         synchronized (this) {
-            if(this instanceof DVD && Data.abonnePeutPasEmprunterDVD(this, ab)){
-                throw new EmpruntException("Desole, vous ne pouvez pas emprunter ce DVD, car vous êtes mineur.");
+            if (this.emprunteur() != null) {
+                throw new EmpruntException("Le document est deja emprunte.");
             }
-            if (empruntePar == null && reservePar == null) {
-                if(Data.emprunt(this, ab)) {
-                    empruntePar = null;
-                    reservePar = ab;
-                    Data.ajoutEmprunt(this, ab);
-                }
-            } else {
-                throw new EmpruntException("Le document est deja reserve ou emprunte.");
+            if (this.reserveur() != null && !this.reserveur().equals(ab)) {
+                throw new EmpruntException("Le document est reserve par une autre personne.");
             }
+            if (this instanceof DVD && Data.abonnePeutPasEmprunterDVD(this, ab)) {
+                throw new EmpruntException("Vous ne pouvez pas emprunter ce DVD car vous etes mineur.");
+            }
+            reservePar = null;
+            empruntePar = ab;
+            dateEmprunt = LocalDateTime.now();
         }
     }
 
     @Override
-    public void retour() throws EmpruntException {
-        synchronized (this){
-            Data.retour(this);
-            if (empruntePar != null) {
-                empruntePar = null;
-            } else if (reservePar != null) {
-                Data.retirerReservation(this);
-                reservePar = null;
-            }
+    public void retour() {
+        synchronized (this) {
+            reservePar = null;
+            empruntePar = null;
+            dateEmprunt = null;
         }
     }
 

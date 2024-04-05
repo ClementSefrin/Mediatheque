@@ -3,15 +3,21 @@ package app;
 import doc.Abonne;
 import doc.EmpruntException;
 
+import java.time.LocalDateTime;
+
 
 public interface IDocument {
     int numero();
-    int getNumero();
+
     // return null si pas emprunté ou pas réservé
-    Abonne emprunteur() ; // Abonné qui a emprunté ce document
-    Abonne reserveur() ; // Abonné qui a réservé ce document
+    Abonne emprunteur(); // Abonné qui a emprunté ce document
+
+    Abonne reserveur(); // Abonné qui a réservé ce document
+
+    LocalDateTime dateEmprunt();
 
     String getTitre();
+
     // precondition : ni réservé ni emprunté
     // EmpruntException si ab n’a pas le droit de réserver CE document
     void reservationPour(Abonne ab) throws EmpruntException;
@@ -21,6 +27,6 @@ public interface IDocument {
     void empruntPar(Abonne ab) throws EmpruntException;
 
     // retour d’un document ou annulation d'une réservation
-    void retour() throws EmpruntException;
+    void retour();
 
 }

@@ -15,10 +15,11 @@ import java.net.Socket;
 import java.util.LinkedList;
 
 public class ServiceEmpruntRetour extends Service {
-    private boolean premierPassage = true;
-    private int numeroAdherent = -1;
+    private Abonne abonne;
+
     public ServiceEmpruntRetour(Socket socket) {
         super(socket);
+        abonne = null;
     }
 
     @Override
@@ -39,30 +40,21 @@ public class ServiceEmpruntRetour extends Service {
                 }
 
                 if (line.equalsIgnoreCase("Emprunt"))
-                    numeroAdherent = emprunt(numeroAdherent, in, out);
+                    emprunt(in, out);
                 else if (line.equalsIgnoreCase("Retour"))
                     retour(in, out);
                 line = "Vouler-vous continuer? (Oui/Non)";
                 out.println(Codage.coder(line));
-                if(quit = Codage.decoder(in.readLine()).equalsIgnoreCase("oui")){
-                    quit = false;
-                }
-                else {
-                    quit = true;
-                    premierPassage = true;
-                }
+                quit = Codage.decoder(in.readLine()).equalsIgnoreCase("non");
             }
 
-            line = "Connexion terminee. Merci d'avoir utilise nos services.";
-            out.println(Codage.coder(line));
-            System.err.println("Un client a termine la connexion.");
-            getClient().close();
-        } catch (IOException | EmpruntException | InterruptedException e) {
+            ServiceUtils.endConnection(getClient(), out);
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private void retour(BufferedReader in, PrintWriter out) throws IOException, EmpruntException {
+    private void retour(BufferedReader in, PrintWriter out) throws IOException {
         int numDoc;
         String line = "Entrez le numero du document que vous voulez retouner : ";
         out.println(Codage.coder(line));
@@ -72,56 +64,38 @@ public class ServiceEmpruntRetour extends Service {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
-           // ServiceUtils.checkConnectionStatus(line, getClient(), out);
+            // ServiceUtils.checkConnectionStatus(line, getClient(), out);
         }
 
-        Document document = (Document) Data.getDocument(numDoc);
-
-        assert document != null;
-        if(Data.empruntOuReservation(document)){
-            out.print(Codage.coder("Le document n'est pas emprunter ou reserve\n"));
-            return;
-        }
-
-        if (Data.estEmprunte(document)) {
-            document.retour();
-            out.print(Codage.coder("Le document a bien ete retourne.\n"));
-        }
-        else{
-            out.print(Codage.coder("Le document n'est pas emprunte.\n"));
-        }
+        IDocument document = Data.getDocument(numDoc);
+        document.retour();
+        out.print(Codage.coder("Document retourne avec succès.\n"));
     }
 
 
-    private int emprunt(int numeroAdherent, BufferedReader in, PrintWriter out)
-            throws IOException, EmpruntException, InterruptedException {
+    private void emprunt(BufferedReader in, PrintWriter out) throws IOException, InterruptedException {
         String line;
-        if (premierPassage) {
+        int numeroAdherent;
+        if (abonne == null) {
             out.println(Codage.coder("Veuillez entrer votre numero d'adherent : "));
             line = Codage.decoder(in.readLine());
-            while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)) {
+            while ((numeroAdherent = ServiceUtils.numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)) {
                 line = "Veuillez entrer un numero valide.";
                 out.println(Codage.coder(line));
                 line = Codage.decoder(in.readLine());
             }
-            premierPassage = false;
             numeroAdherent = Integer.parseInt(line);
+            abonne = Data.getAbonne(numeroAdherent);
         }
 
-        Abonne abonne = Data.getAbonne(numeroAdherent);
         StringBuilder sb = new StringBuilder();
-
-        if (Data.afficherDocumentsEmpruntes(abonne).isEmpty())
-            sb.append("Vous n'avez aucun document reserve.\n");
-        else
-            sb.append("Vous avez un document reserve.\n").append(Data.afficherDocumentsEmpruntes(abonne)).append("\n");
-        assert abonne != null;
-        sb.append(abonne.getNom()).append(" entrez le numero du document que vous voulez emprunter : ");
+        sb.append(Data.afficherDocumentsReserves(abonne));
+        sb.append("Entrez le numero du document que vous voulez emprunter : ");
         out.println(Codage.coder(sb.toString()));
 
         int numDocument;
         line = Codage.decoder(in.readLine());
-        while ((numDocument = numIsCorrect(line)) == -1) {
+        while ((numDocument = ServiceUtils.numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
@@ -132,29 +106,16 @@ public class ServiceEmpruntRetour extends Service {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
-            numDocument = numIsCorrect(line);
+            numDocument = ServiceUtils.numIsCorrect(line);
             document = (Document) Data.getDocument(numDocument);
         }
 
         try {
-            assert document != null;
             document.empruntPar(abonne);
-            out.print(Codage.coder("Emprunt effectue avec succes. Vous avez emprunte : " + document.getTitre() + "\n"));
+            out.print(Codage.coder("Emprunt effectue avec succès."));
         } catch (EmpruntException e) {
-            out.print(Codage.coder( e + "\n"));
-            out.flush();
-            return numeroAdherent;
+            out.print(Codage.coder(e.getMessage()));
         }
-        return numeroAdherent;
-    }
-
-    public static int numIsCorrect(String str) {
-        try {
-            int n = Integer.parseInt(str);
-            if (n < 1) throw new NumberFormatException();
-            return n;
-        } catch (NumberFormatException e) {
-            return -1;
-        }
+        out.print(Codage.coder("\n"));
     }
 }

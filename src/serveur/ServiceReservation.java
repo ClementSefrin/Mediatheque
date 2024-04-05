@@ -18,6 +18,7 @@ import java.util.TimerTask;
 public class ServiceReservation extends Service {
     private Timer timer = new Timer(); // TODO : mettre en partagé
     private TimerTask annulerReservationTask;
+
     public ServiceReservation(Socket socket) {
         super(socket);
     }
@@ -65,13 +66,11 @@ public class ServiceReservation extends Service {
                                 break;
                             } else message = "L'envoûtement était trop fort ! Vous avez manqué le document.";
                         } else message = "Ce document est deja reserve ou emprunte.";
-                    }
-                    else {
-                        if(Data.abonnePeutPasEmprunterDVD(doc, abonne)){
+                    } else {
+                        if (Data.abonnePeutPasEmprunterDVD(doc, abonne)) {
                             message = "Le document est reserve aux personnes majeures";
-                        }
-                        else {
-                            Data.reserver(doc,abonne);
+                        } else {
+                            Data.reserver(doc, abonne);
                             System.out.println(Data.adherentAReserve(doc, abonne)); // TODO : renvoie false…
                             timer.schedule(new AnnulerReservationTask(doc, timer), 120_000); // 2min = 2h
                             message = "Vous avez bien reserve " + doc + "\n";
@@ -87,10 +86,12 @@ public class ServiceReservation extends Service {
             System.err.println("Client deconnecte ?");
             try {
                 this.getClient().close();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         }
         try {
             this.getClient().close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
     }
 }

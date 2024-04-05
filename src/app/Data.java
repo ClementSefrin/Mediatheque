@@ -19,8 +19,6 @@ public class Data implements Runnable {
     private static final LinkedList<IDocument> documents = new LinkedList<>();
     private static final LinkedList<Abonne> abonnes = new LinkedList<>();
     private static final HashMap<IDocument, Abonne> reservations = new HashMap<>();
-    private static final HashMap<HashMap<IDocument,Abonne>, LocalDateTime> documentsEmpruntes = new HashMap<>();
-    // private static HashMap<IDocument, Abonne> emprunts = new HashMap<>();
 
     @Override
     public void run() {
@@ -42,7 +40,7 @@ public class Data implements Runnable {
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 abonnes.add(new Abonne(resultSet.getInt("Numero"), resultSet.getString("Nom"),
-                        resultSet.getDate("DateNaissance")));
+                    resultSet.getDate("DateNaissance")));
             }
 
             //Récupération des documents
@@ -107,7 +105,7 @@ public class Data implements Runnable {
 
     public static IDocument getDocument(int numero) {
         for (IDocument d : documents) {
-            if (d.getNumero() == numero) {
+            if (d.numero() == numero) {
                 return d;
             }
         }
@@ -121,26 +119,6 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static void ajoutEmprunt(IDocument d, Abonne a) {
-        synchronized (documentsEmpruntes) {
-            HashMap<IDocument,Abonne> emprunt = new HashMap<>();
-            emprunt.put(d,a);
-            LocalDateTime aujourdHui = LocalDateTime.now();
-            documentsEmpruntes.put(emprunt, aujourdHui);
-        }
-    }
-
-    public static void retour(IDocument d) {
-        synchronized (documentsEmpruntes) {
-            for (Map.Entry<HashMap<IDocument, Abonne>, LocalDateTime> entry : documentsEmpruntes.entrySet()) {
-                HashMap<IDocument, Abonne> documentAbonneMap = entry.getKey();
-                if (documentAbonneMap.containsKey(d)) {
-                    documentsEmpruntes.remove(documentAbonneMap);
-                    return;
-                }
-            }
-        }
-    }
 
     public static boolean abonneExiste(int numero) {
         for (Abonne a : abonnes)
@@ -150,26 +128,33 @@ public class Data implements Runnable {
     }
 
     public static boolean documentExiste(IDocument d) {
-        if(documents.contains(d))
-            return true;
-        return false;
+        return documents.contains(d);
     }
 
     public static boolean estEmprunte(IDocument d) {
         return d.emprunteur() != null;
     }
-    // TODO : doit-on garder les deux ??
-    public static boolean estEmprunte(Document d) {
-        for (Map.Entry<HashMap<IDocument, Abonne>, LocalDateTime> entry : documentsEmpruntes.entrySet()) {
-            HashMap<IDocument, Abonne> documentAbonneMap = entry.getKey();
-            if (documentAbonneMap.containsKey(d))
-                return true;
-        }
-        return false;
-    }
 
     public static boolean estReserve(IDocument d) {
         return d.emprunteur() != null;
+    }
+
+    public static String afficherDocumentsReserves(Abonne ab) {
+        StringBuilder sb = new StringBuilder();
+        boolean empty = true;
+        for (IDocument doc : documents) {
+            if (doc.reserveur() != null && doc.reserveur().equals(ab)) {
+                if (empty) {
+                    sb.append("Bonjour " + ab.getNom() + ". Voici les documents que vous avez reserves : \n");
+                    empty = false;
+                }
+                sb.append(doc.toString() + "\n");
+            }
+        }
+        if (empty) {
+            sb.append("Vous n'avez aucun documents reserves.\n");
+        }
+        return sb.toString();
     }
 
     public static String nomAbonne(int numero) {
@@ -179,58 +164,18 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static boolean empruntOuReservation(IDocument d) {
-        if(documentsEmpruntes.containsKey(d) || reservations.containsKey(d))
-            return false;
-        return true;
-    }
+    public static void reserver(IDocument d, Abonne a) {
+        synchronized (reservations) {
+            try {
+                d.reservationPour(a);
+            } catch (EmpruntException e) {
 
-    public static String afficherDocumentsEmpruntes(Abonne abonne) {
-        StringBuilder stringBuilder = new StringBuilder();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        for (Map.Entry<HashMap<IDocument, Abonne>, LocalDateTime> entry : documentsEmpruntes.entrySet()) {
-            HashMap<IDocument, Abonne> documentAbonneMap = entry.getKey();
-            LocalDateTime dateEmprunt = entry.getValue();
-
-            for (Map.Entry<IDocument, Abonne> innerEntry : documentAbonneMap.entrySet()) {
-                IDocument document = innerEntry.getKey();
-                Abonne abonneEmprunteur = innerEntry.getValue();
-
-                if (abonneEmprunteur.equals(abonne)) {
-                    String formattedDate = dateEmprunt.format(formatter);
-                    stringBuilder.append("Titre du document: ").append(document.getTitre()).append(", Date d'emprunt: ")
-                            .append(formattedDate).append("\n");
-                }
             }
         }
-        return stringBuilder.toString();
-    }
-
-    public static void reserver(IDocument d, Abonne a) {
-        synchronized (reservations){
-            reservations.put(d, a);
-        }
-    }
-
-    public static boolean emprunt(IDocument d, Abonne a){
-        if(documentsEmpruntes.containsKey(d)){
-            documentsEmpruntes.remove(d);
-            return false;
-        }
-        return true;
-    }
-
-    public static String abonneAEmprunte(Abonne a) {
-        StringBuilder sb = new StringBuilder();
-        for (IDocument d : reservations.keySet())
-            if (reservations.get(d).equals(a))
-                sb.append(d.getTitre()).append("\n");
-        return sb.toString();
     }
 
     public static boolean adherentAReserve(IDocument d, Abonne a) {
-        return d.reserveur()!= null && d.reserveur().equals(a);
+        return d.reserveur() != null && d.reserveur().equals(a);
     }
 
     public static void retirerReservation(IDocument d) throws EmpruntException {

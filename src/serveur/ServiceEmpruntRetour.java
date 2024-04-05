@@ -25,45 +25,47 @@ public class ServiceEmpruntRetour extends Service {
     @Override
     public void run() {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
-            PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
-            boolean continuer = true;
-            String line = "";
-            while (continuer) {
-                String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
-                out.println(Codage.coder(demandeService));
-                line = Codage.decoder(in.readLine());
-                ServiceUtils.checkConnectionStatus(line, getClient());
-
-                while (!line.equalsIgnoreCase("Emprunt") && !line.equalsIgnoreCase("Retour")) {
-                    out.println(Codage.coder("Ce service n'est pas disponible. \n" + demandeService));
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
+                PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
+                boolean continuer = true;
+                String line = "";
+                while (continuer) {
+                    String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
+                    out.println(Codage.coder(demandeService));
                     line = Codage.decoder(in.readLine());
                     ServiceUtils.checkConnectionStatus(line, getClient());
-                }
 
-                if (line.equalsIgnoreCase("Emprunt"))
-                    emprunt(in, out);
-                else if (line.equalsIgnoreCase("Retour"))
-                    retour(in, out);
-                line = "Vouler-vous continuer? (Oui/Non)";
-                out.println(Codage.coder(line));
+                    while (!line.equalsIgnoreCase("Emprunt") && !line.equalsIgnoreCase("Retour")) {
+                        out.println(Codage.coder("Ce service n'est pas disponible. \n" + demandeService));
+                        line = Codage.decoder(in.readLine());
+                        ServiceUtils.checkConnectionStatus(line, getClient());
+                    }
 
-                line = Codage.decoder(in.readLine());
-                ServiceUtils.checkConnectionStatus(line, getClient());
-
-                while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
-                    line = "Veuillez entrer une réponse valide.";
+                    if (line.equalsIgnoreCase("Emprunt"))
+                        emprunt(in, out);
+                    else if (line.equalsIgnoreCase("Retour"))
+                        retour(in, out);
+                    line = "Vouler-vous continuer? (Oui/Non)";
                     out.println(Codage.coder(line));
+
                     line = Codage.decoder(in.readLine());
                     ServiceUtils.checkConnectionStatus(line, getClient());
+
+                    while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
+                        line = "Veuillez entrer une réponse valide.";
+                        out.println(Codage.coder(line));
+                        line = Codage.decoder(in.readLine());
+                        ServiceUtils.checkConnectionStatus(line, getClient());
+                    }
+
+                    continuer = line.equalsIgnoreCase("oui");
                 }
 
-                continuer = line.equalsIgnoreCase("oui");
+                ServiceUtils.endConnection(this.getClient());
+            } catch (IOException | InterruptedException e) {
+                throw new FinConnexionException("Connexion terminee.");
             }
-
-            ServiceUtils.endConnection(this.getClient());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
         } catch (FinConnexionException e) {
             System.err.println(e.getMessage());
         }

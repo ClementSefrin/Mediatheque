@@ -67,7 +67,7 @@ public class ServiceEmpruntRetour extends Service {
         String line = "Entrez le numero du document que vous voulez retouner : ";
         out.println(Codage.coder(line));
         line = Codage.decoder(in.readLine());
-      //  ServiceUtils.checkConnectionStatus(line, getClient(), out);
+        // ServiceUtils.checkConnectionStatus(line, getClient(), out);
         while ((numDoc = ServiceUtils.numIsCorrect(line)) == -1) {
             line = "Veuillez entrer un numero valide.";
             out.println(Codage.coder(line));
@@ -83,7 +83,7 @@ public class ServiceEmpruntRetour extends Service {
             return;
         }
 
-        if (Data.estEmpruntee(document)) {
+        if (Data.estEmprunte(document)) {
             document.retour();
             out.print(Codage.coder("Le document a bien ete retourne.\n"));
         }
@@ -99,7 +99,7 @@ public class ServiceEmpruntRetour extends Service {
         if (premierPassage) {
             out.println(Codage.coder("Veuillez entrer votre numero d'adherent : "));
             line = Codage.decoder(in.readLine());
-            while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.AbboneExiste(numeroAdherent)) {
+            while ((numeroAdherent = numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)) {
                 line = "Veuillez entrer un numero valide.";
                 out.println(Codage.coder(line));
                 line = Codage.decoder(in.readLine());

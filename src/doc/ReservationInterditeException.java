@@ -6,7 +6,7 @@ public class ReservationInterditeException extends Exception {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    //TODO : faire une exception quand un mineur réserve ou emprunt un film pour adulte (
+    //TODO : faire une exception quand un mineur reserve ou emprunt un film pour adulte (
     /*private final Cours cours;
     private final int nbPlaces;
 
@@ -17,7 +17,7 @@ public class ReservationInterditeException extends Exception {
 
     @Override
     public String toString() {
-        return "Désole, il n'y a pas " + this.nbPlaces + " places pour le cours " + cours.getNumeroCours();
+        return "Desole, il n'y a pas " + this.nbPlaces + " places pour le cours " + cours.getNumeroCours();
     }*/
 
 }

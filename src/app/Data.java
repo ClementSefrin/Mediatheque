@@ -106,7 +106,6 @@ public class Data implements Runnable {
     }
 
     public static IDocument getDocument(int numero) {
-
         for (IDocument d : documents) {
             if (d.getNumero() == numero) {
                 return d;
@@ -115,17 +114,14 @@ public class Data implements Runnable {
         return null;
     }
 
-
     public static IDocument getDocumentAbonne(Abonne a) {
-        for (IDocument d : documents) {
-            if (d.emprunteur() != null && d.emprunteur().equals(a)) {
+        for (IDocument d : documents)
+            if (d.emprunteur() != null && d.emprunteur().equals(a))
                 return d;
-            }
-        }
         return null;
     }
 
-    public static void ajoutEmprunt(Document d, Abonne a) {
+    public static void ajoutEmprunt(IDocument d, Abonne a) {
         synchronized (documentsEmpruntes) {
             HashMap<IDocument,Abonne> emprunt = new HashMap<>();
             emprunt.put(d,a);
@@ -134,7 +130,7 @@ public class Data implements Runnable {
         }
     }
 
-    public static void retour(Document d) {
+    public static void retour(IDocument d) {
         synchronized (documentsEmpruntes) {
             for (Map.Entry<HashMap<IDocument, Abonne>, LocalDateTime> entry : documentsEmpruntes.entrySet()) {
                 HashMap<IDocument, Abonne> documentAbonneMap = entry.getKey();
@@ -146,32 +142,28 @@ public class Data implements Runnable {
         }
     }
 
-    public static boolean AbboneExiste(int numero) {
-        for (Abonne a : abonnes) {
-            if (a.getNumero() == numero) {
+    public static boolean abonneExiste(int numero) {
+        for (Abonne a : abonnes)
+            if (a.getNumero() == numero)
                 return true;
-            }
-        }
         return false;
     }
 
     public static boolean documentExiste(IDocument d) {
-        if(documents.contains(d)){
+        if(documents.contains(d))
             return true;
-        }
         return false;
     }
 
     public static boolean estEmprunte(IDocument d) {
         return d.emprunteur() != null;
     }
-
-    public static boolean estEmpruntee(Document d) {
+    // TODO : doit-on garder les deux ??
+    public static boolean estEmprunte(Document d) {
         for (Map.Entry<HashMap<IDocument, Abonne>, LocalDateTime> entry : documentsEmpruntes.entrySet()) {
             HashMap<IDocument, Abonne> documentAbonneMap = entry.getKey();
-            if (documentAbonneMap.containsKey(d)) {
+            if (documentAbonneMap.containsKey(d))
                 return true;
-            }
         }
         return false;
     }
@@ -181,18 +173,15 @@ public class Data implements Runnable {
     }
 
     public static String nomAbonne(int numero) {
-        for (Abonne a : abonnes) {
-            if (a.getNumero() == numero) {
+        for (Abonne a : abonnes)
+            if (a.getNumero() == numero)
                 return a.getNom();
-            }
-        }
         return null;
     }
 
-    public static boolean empruntOuReservation(Document d) {
-        if(documentsEmpruntes.containsKey(d) || reservations.containsKey(d)){
+    public static boolean empruntOuReservation(IDocument d) {
+        if(documentsEmpruntes.containsKey(d) || reservations.containsKey(d))
             return false;
-        }
         return true;
     }
 
@@ -210,13 +199,13 @@ public class Data implements Runnable {
 
                 if (abonneEmprunteur.equals(abonne)) {
                     String formattedDate = dateEmprunt.format(formatter);
-                    stringBuilder.append("Titre du document: ").append(document.getTitre()).append(", Date d'emprunt: ").append(formattedDate).append("\n");
+                    stringBuilder.append("Titre du document: ").append(document.getTitre()).append(", Date d'emprunt: ")
+                            .append(formattedDate).append("\n");
                 }
             }
         }
         return stringBuilder.toString();
     }
-
 
     public static void reserver(IDocument d, Abonne a) {
         synchronized (reservations){
@@ -224,17 +213,7 @@ public class Data implements Runnable {
         }
     }
 
-
-    public static String abonneAEmprunte(Abonne a) {
-        StringBuilder sb = new StringBuilder();
-        for (IDocument d : reservations.keySet()) {
-            if (reservations.get(d).equals(a)) {
-                //sb.append(d.getTitre()).append("\n");
-            }
-        }
-        return sb.toString();
-    }
-    public static boolean emprunt(Document d, Abonne a){
+    public static boolean emprunt(IDocument d, Abonne a){
         if(documentsEmpruntes.containsKey(d)){
             documentsEmpruntes.remove(d);
             return false;
@@ -242,6 +221,13 @@ public class Data implements Runnable {
         return true;
     }
 
+    public static String abonneAEmprunte(Abonne a) {
+        StringBuilder sb = new StringBuilder();
+        for (IDocument d : reservations.keySet())
+            if (reservations.get(d).equals(a))
+                sb.append(d.getTitre()).append("\n");
+        return sb.toString();
+    }
 
     public static boolean adherentAReserve(IDocument d, Abonne a) {
         return d.reserveur()!= null && d.reserveur().equals(a);
@@ -259,14 +245,5 @@ public class Data implements Runnable {
 
     public static boolean abonnePeutPasEmprunterDVD(IDocument d, Abonne a) {
         return DVDPourMajeur(d) && !a.estMajeur();
-    }
-
-    public static boolean abonneExiste(int numero) {
-        for (Abonne a : abonnes) {
-            if (a.getNumero() == numero) {
-                return true;
-            }
-        }
-        return false;
     }
 }

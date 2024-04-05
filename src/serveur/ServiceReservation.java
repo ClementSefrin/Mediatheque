@@ -53,9 +53,9 @@ public class ServiceReservation extends Service {
                 if (doc == null)
                     message = "Ce document n'existe pas.";
                 else {
-                    if (Data.estReserve(doc) || Data.estEmprunte(doc)) {
+                    if (Data.estReserve(doc) || Data.estEmprunte(doc)) { // TODO : séparer les deux
                         if (true) { // TODO :  Trouver un moyen de connaître le temps restant
-                            AudioPlayer.playAudio("../musique/waiting_song.mp3"); // TODO : ne fonctionne pas
+                            AudioPlayer.playAudio("../musique/waiting_song.wav");
                             // Faire patienter le client (30 sec)
                             Thread.sleep(30_000);
                             AudioPlayer.stopAudio();
@@ -72,7 +72,7 @@ public class ServiceReservation extends Service {
                         }
                         else {
                             Data.reserver(doc,abonne);
-                            System.out.println(Data.adherentAReserve(doc, abonne)); // TODO : à tester
+                            System.out.println(Data.adherentAReserve(doc, abonne)); // TODO : renvoie false…
                             timer.schedule(new AnnulerReservationTask(doc, timer), 120_000); // 2min = 2h
                             message = "Vous avez bien reserve " + doc + "\n";
                         }

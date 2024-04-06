@@ -13,7 +13,7 @@ public class Client {
     private final static String HOST = "localhost";
 
     public static void main(String[] args) {
-        Socket socket;
+        Socket socket = null;
         try {
             socket = new Socket(HOST, PORT);
             BufferedReader sin = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -40,11 +40,11 @@ public class Client {
             System.err.println("Fin de la connexion. Merci d'avoir utilise nos services.");
         } catch (IOException e) {
             System.err.println(e);
-        }/*
+        }
         // Refermer dans tous les cas la socket
         try {
             if (socket != null) socket.close();
         } catch (IOException ignored) {
-        }*/
+        }
     }
 }

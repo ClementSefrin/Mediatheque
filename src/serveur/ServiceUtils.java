@@ -1,9 +1,13 @@
 package serveur;
 
+import app.Data;
 import app.IDocument;
+import codage.Codage;
 import doc.Abonne;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

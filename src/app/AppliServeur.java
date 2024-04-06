@@ -7,7 +7,7 @@ import serveur.ServiceReservation;
 import java.io.IOException;
 
 
-public class Appli {
+public class AppliServeur {
     private final static int PORT_RESERVATION = 3000;
     private final static int PORT_EMPRUNT_RETOUR = 4000;
 

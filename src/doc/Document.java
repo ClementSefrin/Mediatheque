@@ -20,11 +20,10 @@ public class Document implements IDocument {
         this.numero = numero;
         this.titre = titre;
         if (abonne != null || etat != EtatDemande.DISPONIBLE) {
-            if (etat == EtatDemande.RESERVE) {
+            if (etat == EtatDemande.RESERVE)
                 reservePar = abonne;
-            } else if (etat == EtatDemande.EMPRUNTE) {
+            else if (etat == EtatDemande.EMPRUNTE)
                 empruntePar = abonne;
-            }
         }
     }
 
@@ -65,23 +64,19 @@ public class Document implements IDocument {
 
     @Override
     public void reservationPour(Abonne ab) throws EmpruntException {
-        if (reservePar == null && empruntePar == null) {
+        if (reservePar == null && empruntePar == null)
             reservePar = ab;
-        }
     }
 
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {
         synchronized (this) {
-            if (this.emprunteur() != null) {
+            if (this.emprunteur() != null)
                 throw new EmpruntException("Le document est deja emprunte.");
-            }
-            if (this.reserveur() != null && !this.reserveur().equals(ab)) {
+            if (this.reserveur() != null && !this.reserveur().equals(ab))
                 throw new EmpruntException("Le document est reserve par une autre personne.");
-            }
-            if (this instanceof DVD && Data.abonnePeutPasEmprunterDVD(this, ab)) {
+            if (this instanceof DVD && Data.abonnePeutPasEmprunterDVD(this, ab))
                 throw new EmpruntException("Vous ne pouvez pas emprunter ce DVD car vous etes mineur.");
-            }
             reservePar = null;
             empruntePar = ab;
             dateEmprunt = LocalDateTime.now();

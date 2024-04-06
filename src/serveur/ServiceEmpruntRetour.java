@@ -135,8 +135,8 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         StringBuilder sb = new StringBuilder();
-        //sb.append(Data.afficherDocumentsReserves(abonne));
-        sb.append(Data.afficherDocumentsEmpruntes(abonne));
+        sb.append(Data.afficherDocumentsReserves(abonne));
+        //sb.append(Data.afficherDocumentsEmpruntes(abonne));
         sb.append("Entrez le numero du document que vous voulez emprunter : ");
         out.println(Codage.coder(sb.toString()));
 

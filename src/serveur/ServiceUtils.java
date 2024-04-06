@@ -5,8 +5,6 @@ import doc.Abonne;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class ServiceUtils {
 
@@ -46,7 +44,7 @@ public class ServiceUtils {
            // LocalDate dateLimite = doc.dateEmprunt().plusDays(15);
            // if(LocalDate.now().isAfter(dateLimite)){
                 a.bannir();
-                a.putDateBannisement();
+                a.putDateBannissement();
                 return true;
             }
     }

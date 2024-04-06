@@ -11,8 +11,8 @@ public class Abonne {
     private final String nom;
     private final Date dateNaissance;
     private static final int AGE_MAJEUR = 16;
-    private LocalDateTime dateBanissement = null;
-    private boolean estBanis = false;
+    private LocalDateTime dateBannissement = null;
+    private boolean estBanni = false;
 
     public Abonne(int numero, String nom, Date dateNaissance ) {
         this.numero = numero;
@@ -35,19 +35,19 @@ public class Abonne {
     }
 
     public boolean bannir() {
-        return estBanis = true;
+        return estBanni = true;
     }
 
-    public LocalDateTime putDateBannisement() {
-        return dateBanissement = LocalDateTime.now().plusDays(30);
+    public LocalDateTime putDateBannissement() {
+        return dateBannissement = LocalDateTime.now().plusDays(30);
     }
 
-    public String getDateBanissement() {
-        if (dateBanissement == null) {
+    public String getDateBannissement() {
+        if (dateBannissement == null) {
             return null;
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-        return dateBanissement.format(formatter);
+        return dateBannissement.format(formatter);
     }
 
     @Override

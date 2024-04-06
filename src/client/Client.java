@@ -13,7 +13,7 @@ public class Client {
     private final static String HOST = "localhost";
 
     public static void main(String[] args) {
-        Socket socket = null;
+        Socket socket;
         try {
             socket = new Socket(HOST, PORT);
             BufferedReader sin = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -25,7 +25,7 @@ public class Client {
 
             while (socket.isConnected()) {
                 inLine = sin.readLine();
-                if (inLine == null || (inLine != null && inLine.equalsIgnoreCase("quit"))) {
+                if (inLine == null || inLine.equalsIgnoreCase("quit")) {
                     break;
                 }
                 System.out.println(Codage.decoder(inLine));

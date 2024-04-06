@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.LinkedList;
 
 public class ServiceEmpruntRetour extends Service {
     private Abonne abonne;
@@ -26,10 +25,14 @@ public class ServiceEmpruntRetour extends Service {
     public void run() {
         try {
             try {
+                System.out.println("Traitement du client : " + this.getClient().getInetAddress() + "," + this.getClient().getPort());
+
                 BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
                 PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
+
                 boolean continuer = true;
                 String line = "";
+
                 while (continuer) {
                     String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
                     out.println(Codage.coder(demandeService));
@@ -53,7 +56,7 @@ public class ServiceEmpruntRetour extends Service {
                     ServiceUtils.checkConnectionStatus(line, getClient());
 
                     while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
-                        line = "Veuillez entrer une r�ponse valide.";
+                        line = "Veuillez entrer une reponse valide.";
                         out.println(Codage.coder(line));
                         line = Codage.decoder(in.readLine());
                         ServiceUtils.checkConnectionStatus(line, getClient());
@@ -64,7 +67,7 @@ public class ServiceEmpruntRetour extends Service {
 
                 ServiceUtils.endConnection(this.getClient());
             } catch (IOException | InterruptedException e) {
-                throw new FinConnexionException("Connexion terminee.");
+                throw new FinConnexionException("Connexion terminee. Merci d'avoir utilise nos services.");
             }
         } catch (FinConnexionException e) {
             System.err.println(e.getMessage());
@@ -147,7 +150,7 @@ public class ServiceEmpruntRetour extends Service {
                 out.print(Codage.coder("Emprunt effectue avec succes." + document.dateEmprunt()));
                 abonne.bannir();
                 ServiceUtils.abonneARenduEnretard(document, abonne);
-                System.out.println("l'abonne a ete banni. jusqu'au :" + abonne.getDateBanissement());
+                System.out.println("l'abonne a ete banni. jusqu'au :" + abonne.getDateBannissement());
             } catch (EmpruntException e) {
                 out.print(Codage.coder(e.getMessage()));
             }

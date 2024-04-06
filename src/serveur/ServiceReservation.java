@@ -26,7 +26,8 @@ public class ServiceReservation extends Service {
     @Override
     public void run() {
         try {
-            System.out.println("Traitement du client : " + this.getClient().getInetAddress() + "," + this.getClient().getPort());
+            try {
+                System.out.println("Traitement du client : " + this.getClient().getInetAddress() + "," + this.getClient().getPort());
 
             BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
             PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
@@ -39,6 +40,7 @@ public class ServiceReservation extends Service {
                 line = "Veuillez entrer un numero valide.";
                 out.println(Codage.coder(line));
                 line = Codage.decoder(in.readLine());
+                ServiceUtils.checkConnectionStatus(line, getClient());
             }
 
             Abonne abonne = Data.getAbonne(numeroAdherent);
@@ -48,6 +50,7 @@ public class ServiceReservation extends Service {
                 assert abonne != null;
                 out.println(Codage.coder("Que voulez-vous reserver, " + abonne.getNom() + " ? > "));
                 int numDocs = Integer.parseInt(in.readLine());
+                ServiceUtils.checkConnectionStatus(line, getClient());
 
                 IDocument doc = Data.getDocument(numDocs);
                 String message;
@@ -71,7 +74,7 @@ public class ServiceReservation extends Service {
                             message = "Le document est reserve aux personnes majeures";
                         } else {
                             Data.reserver(doc, abonne);
-                            System.out.println(Data.adherentAReserve(doc, abonne)); // TODO : renvoie false…
+                            System.out.println(Data.adherentAReserve(doc, abonne));
                             timer.schedule(new AnnulerReservationTask(doc, timer), 120_000); // 2min = 2h
                             message = "Vous avez bien reserve " + doc + "\n";
                         }
@@ -79,19 +82,15 @@ public class ServiceReservation extends Service {
                 }
                 out.println(Codage.coder(message + "\nVoulez-vous continuer ? (oui/non)"));
                 continuer = in.readLine().trim().equalsIgnoreCase("oui");
+                ServiceUtils.checkConnectionStatus(line, getClient());
             }
 
-            out.println(Codage.coder("Connexion terminee. Merci d'avoir utilise nos services."));
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Client deconnecte ?");
-            try {
-                this.getClient().close();
-            } catch (IOException ignored) {
+            ServiceUtils.endConnection(this.getClient());
+            } catch (IOException | InterruptedException e) {
+                throw new FinConnexionException("Connexion terminee. Merci d'avoir utilise nos services.");
             }
-        }
-        try {
-            this.getClient().close();
-        } catch (IOException ignored) {
+        } catch (FinConnexionException e) {
+            System.err.println(e.getMessage());
         }
     }
 }

@@ -119,7 +119,6 @@ public class Data implements Runnable {
         return null;
     }
 
-
     public static boolean abonneExiste(int numero) {
         for (Abonne a : abonnes)
             if (a.getNumero() == numero)

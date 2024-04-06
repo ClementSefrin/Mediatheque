@@ -13,6 +13,7 @@ public class Abonne {
     private static final int AGE_MAJEUR = 16;
     private LocalDateTime dateBannissement = null;
     private boolean estBanni = false;
+    private final static int DUREE_BAN = 30;
 
     public Abonne(int numero, String nom, Date dateNaissance ) {
         this.numero = numero;
@@ -34,15 +35,14 @@ public class Abonne {
         return aujourdHui.minusYears(AGE_MAJEUR).isAfter(dateNaiss);
     }
 
-    public boolean bannir() {
-        return estBanni = true;
+    public void bannir() {
+        estBanni = true;
+         dateBannissement = LocalDateTime.now().plusDays(DUREE_BAN);
+         System.out.println("Vous avez été banni pour 30 jours " + getDateBanissement());
     }
 
-    public LocalDateTime putDateBannissement() {
-        return dateBannissement = LocalDateTime.now().plusDays(30);
-    }
-
-    public String getDateBannissement() {
+    public String getDateBanissement() {
+        System.out.println(dateBannissement);
         if (dateBannissement == null) {
             return null;
         }

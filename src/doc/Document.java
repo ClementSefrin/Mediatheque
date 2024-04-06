@@ -34,12 +34,13 @@ public class Document implements IDocument {
     }
 
     @Override
-    public String dateEmprunt() {
-        if (dateEmprunt == null) {
-            return null;
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-        return dateEmprunt.format(formatter);
+    public LocalDateTime dateEmprunt() {
+        return dateEmprunt;
+    }
+
+    public static String dateEmpruntFormat(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        return LocalDateTime.now().format(formatter);
     }
 
     @Override
@@ -51,6 +52,8 @@ public class Document implements IDocument {
     public String getTitre() {
         return titre;
     }
+
+
 
     //TODO : les fonctions qui sont en-dessous ne changent pas l'état du document
     @Override
@@ -69,8 +72,6 @@ public class Document implements IDocument {
             reservePar = ab;
         }
     }
-
-
 
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {
@@ -93,9 +94,10 @@ public class Document implements IDocument {
     @Override
     public void retour() {
         synchronized (this) {
-            reservePar = null;
-            empruntePar = null;
-            dateEmprunt = null;
+            if (empruntePar != null) {
+                empruntePar = null;
+                dateEmprunt = null;
+            }
         }
     }
 

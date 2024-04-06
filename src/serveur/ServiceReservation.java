@@ -43,8 +43,13 @@ public class ServiceReservation extends Service {
                 ServiceUtils.checkConnectionStatus(line, getClient());
             }
 
+
             Abonne abonne = Data.getAbonne(numeroAdherent);
             boolean continuer = true;
+            if(abonne.estBanni()){
+                out.print(Codage.coder("Le grand chef Géronimo vous a banni jusqu'au : " + abonne.getDateBanissement() + "\n"));
+                continuer = false;
+            }
 
             while (continuer) {
                 assert abonne != null;

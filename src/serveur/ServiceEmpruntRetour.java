@@ -12,9 +12,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDateTime;
 
 public class ServiceEmpruntRetour extends Service {
     private Abonne abonne;
+    private final static int DUREE_MAX_RENDU_SEMAINE = 2;
 
     public ServiceEmpruntRetour(Socket socket) {
         super(socket);
@@ -88,10 +90,26 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         IDocument document = Data.getDocument(numDoc);
-        document.retour();
-        out.print(Codage.coder("Document retourne avec succes.\n"));
+        if(document == null){
+            out.print(Codage.coder("Le document n'existe pas.\n"));
+        }
+        else if(document.emprunteur() == null){
+            out.print(Codage.coder("Le document n'est pas emprunte.\n"));
+        }
+        else {
+            LocalDateTime date = LocalDateTime.parse(document.dateEmprunt());
+            document.retour();
+            // ligne de test en seconde
+            // if(LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))){
+            if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
+                abonne.bannir();
+                out.print(Codage.coder("Document retourne avec succes, cependant le grand chef Géronimo vous a banni pour 1 mois.\n"));
+            }
+            else {
+                out.print(Codage.coder("Document retourne avec succes.\n"));
+            }
+        }
     }
-
 
     private void emprunt(BufferedReader in, PrintWriter out) throws IOException, InterruptedException, FinConnexionException {
         String line;
@@ -110,8 +128,14 @@ public class ServiceEmpruntRetour extends Service {
             abonne = Data.getAbonne(numeroAdherent);
         }
 
+        if(abonne.estBanni() == true){
+            out.print(Codage.coder("Le grand chef Géronimo vous a banni jusqu'au : " + abonne.getDateBanissement() + "\n"));
+            return;
+        }
+
         StringBuilder sb = new StringBuilder();
-        sb.append(Data.afficherDocumentsReserves(abonne));
+        //sb.append(Data.afficherDocumentsReserves(abonne));
+        sb.append(Data.afficherDocumentsEmpruntes(abonne));
         sb.append("Entrez le numero du document que vous voulez emprunter : ");
         out.println(Codage.coder(sb.toString()));
 
@@ -147,10 +171,7 @@ public class ServiceEmpruntRetour extends Service {
         if (line.equalsIgnoreCase("oui")) {
             try {
                 document.empruntPar(abonne);
-                out.print(Codage.coder("Emprunt effectue avec succes." + document.dateEmprunt()));
-                abonne.bannir();
-                ServiceUtils.abonneARenduEnretard(document, abonne);
-                System.out.println("l'abonne a ete banni. jusqu'au :" + abonne.getDateBannissement());
+                out.print(Codage.coder("Emprunt effectue avec succes. Ce jour : " + Document.dateEmpruntFormat()));
             } catch (EmpruntException e) {
                 out.print(Codage.coder(e.getMessage()));
             }

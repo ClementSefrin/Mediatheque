@@ -45,7 +45,7 @@ public class ServiceReservation extends Service {
             Abonne abonne = Data.getAbonne(numeroAdherent);
             boolean continuer = true;
             if(abonne.estBanni()){
-                out.println(Codage.coder("Vous etes banni jusqu'au " + abonne.getDateBanissement()));
+                out.print(Codage.coder("Le grand chef Géronimo vous a banni jusqu'au : " + abonne.getDateBanissement() + "\n"));
                 continuer = false;
             }
 

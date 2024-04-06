@@ -35,19 +35,4 @@ public class ServiceUtils {
             return -1;
         }
     }
-
-
-
-    public static boolean abonneARenduEnretard(IDocument doc, Abonne a) {
-        if(doc.dateEmprunt() == null){
-            return false;
-        }
-        else{
-           // LocalDate dateLimite = doc.dateEmprunt().plusDays(15);
-           // if(LocalDate.now().isAfter(dateLimite)){
-                a.bannir();
-                a.putDateBannisement();
-                return true;
-            }
-    }
 }

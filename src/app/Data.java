@@ -157,6 +157,24 @@ public class Data implements Runnable {
         return sb.toString();
     }
 
+    public static String afficherDocumentsEmpruntes(Abonne ab) {
+        StringBuilder sb = new StringBuilder();
+        boolean empty = true;
+        for (IDocument doc : documents) {
+            if (doc.emprunteur() != null && doc.emprunteur().equals(ab)) {
+                if (empty) {
+                    sb.append("Bonjour " + ab.getNom() + ". Voici les documents que vous avez empruntes : \n");
+                    empty = false;
+                }
+                sb.append(doc.toString() + "\n");
+            }
+        }
+        if (empty) {
+            sb.append("Vous n'avez aucun documents empruntes.\n");
+        }
+        return sb.toString();
+    }
+
     public static String nomAbonne(int numero) {
         for (Abonne a : abonnes)
             if (a.getNumero() == numero)

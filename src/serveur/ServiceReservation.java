@@ -41,8 +41,13 @@ public class ServiceReservation extends Service {
                 line = Codage.decoder(in.readLine());
             }
 
+
             Abonne abonne = Data.getAbonne(numeroAdherent);
             boolean continuer = true;
+            if(abonne.estBanni()){
+                out.println(Codage.coder("Vous etes banni jusqu'au " + abonne.getDateBanissement()));
+                continuer = false;
+            }
 
             while (continuer) {
                 assert abonne != null;

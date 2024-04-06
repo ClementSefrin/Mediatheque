@@ -53,7 +53,7 @@ public class ServiceEmpruntRetour extends Service {
                     ServiceUtils.checkConnectionStatus(line, getClient());
 
                     while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
-                        line = "Veuillez entrer une réponse valide.";
+                        line = "Veuillez entrer une rï¿½ponse valide.";
                         out.println(Codage.coder(line));
                         line = Codage.decoder(in.readLine());
                         ServiceUtils.checkConnectionStatus(line, getClient());
@@ -86,7 +86,7 @@ public class ServiceEmpruntRetour extends Service {
 
         IDocument document = Data.getDocument(numDoc);
         document.retour();
-        out.print(Codage.coder("Document retourne avec succès.\n"));
+        out.print(Codage.coder("Document retourne avec succes.\n"));
     }
 
 
@@ -136,7 +136,7 @@ public class ServiceEmpruntRetour extends Service {
         line = Codage.decoder(in.readLine());
         ServiceUtils.checkConnectionStatus(line, getClient());
         while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
-            line = "Veuillez entrer une réponse valide.";
+            line = "Veuillez entrer une reponse valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
             ServiceUtils.checkConnectionStatus(line, getClient());
@@ -144,7 +144,10 @@ public class ServiceEmpruntRetour extends Service {
         if (line.equalsIgnoreCase("oui")) {
             try {
                 document.empruntPar(abonne);
-                out.print(Codage.coder("Emprunt effectue avec succès."));
+                out.print(Codage.coder("Emprunt effectue avec succes." + document.dateEmprunt()));
+                abonne.bannir();
+                ServiceUtils.abonneARenduEnretard(document, abonne);
+                System.out.println("l'abonne a ete banni. jusqu'au :" + abonne.getDateBanissement());
             } catch (EmpruntException e) {
                 out.print(Codage.coder(e.getMessage()));
             }

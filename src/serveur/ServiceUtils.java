@@ -1,10 +1,12 @@
 package serveur;
 
-import codage.Codage;
+import app.IDocument;
+import doc.Abonne;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class ServiceUtils {
 
@@ -32,5 +34,20 @@ public class ServiceUtils {
         } catch (NumberFormatException e) {
             return -1;
         }
+    }
+
+
+
+    public static boolean abonneARenduEnretard(IDocument doc, Abonne a) {
+        if(doc.dateEmprunt() == null){
+            return false;
+        }
+        else{
+           // LocalDate dateLimite = doc.dateEmprunt().plusDays(15);
+           // if(LocalDate.now().isAfter(dateLimite)){
+                a.bannir();
+                a.putDateBannisement();
+                return true;
+            }
     }
 }

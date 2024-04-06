@@ -4,7 +4,9 @@ import app.Data;
 import app.IDocument;
 import doc.types.DVD;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class Document implements IDocument {
@@ -32,8 +34,12 @@ public class Document implements IDocument {
     }
 
     @Override
-    public LocalDateTime dateEmprunt() {
-        return dateEmprunt;
+    public String dateEmprunt() {
+        if (dateEmprunt == null) {
+            return null;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        return dateEmprunt.format(formatter);
     }
 
     @Override
@@ -63,6 +69,8 @@ public class Document implements IDocument {
             reservePar = ab;
         }
     }
+
+
 
     @Override
     public void empruntPar(Abonne ab) throws EmpruntException {

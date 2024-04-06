@@ -3,6 +3,7 @@ package app;
 import doc.Abonne;
 import doc.EmpruntException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -14,7 +15,7 @@ public interface IDocument {
 
     Abonne reserveur(); // Abonné qui a réservé ce document
 
-    LocalDateTime dateEmprunt();
+    String dateEmprunt();
 
     String getTitre();
 

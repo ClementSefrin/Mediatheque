@@ -94,10 +94,9 @@ public class Document implements IDocument {
     @Override
     public void retour() {
         synchronized (this) {
-            if (empruntePar != null) {
-                empruntePar = null;
-                dateEmprunt = null;
-            }
+            reservePar = null;
+            empruntePar = null;
+            dateEmprunt = null;
         }
     }
 

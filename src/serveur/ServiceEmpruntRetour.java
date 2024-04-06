@@ -16,9 +16,7 @@ import java.time.LocalDateTime;
 
 public class ServiceEmpruntRetour extends Service {
     private Abonne abonne;
-
-    // Todo : durée de test à modifier à 2 et supprimer la ligne de test
-    private final static int DUREE_MAX_RENDU_SEMAINE = 10;
+    private final static int DUREE_MAX_RENDU_SEMAINE = 2;
 
     public ServiceEmpruntRetour(Socket socket) {
         super(socket);
@@ -96,9 +94,9 @@ public class ServiceEmpruntRetour extends Service {
         else {
             LocalDateTime date = document.dateEmprunt();
             document.retour();
-            // TODO : à modifier après la durée de test
-            //if(LocalDateTime.now().isAfter(date.plusWeeks(2))){
-                if(LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))){
+            // ligne de test en seconde
+            // if(LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))){
+            if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
                 abonne.bannir();
                 out.print(Codage.coder("Document retourne avec succes, cependant le grand chef Géronimo vous a banni pour 1 mois.\n"));
             }

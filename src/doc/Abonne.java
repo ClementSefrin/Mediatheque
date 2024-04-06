@@ -35,9 +35,19 @@ public class Abonne {
         return aujourdHui.minusYears(AGE_MAJEUR).isAfter(dateNaiss);
     }
 
+    public boolean estBanni() {
+        if(!estBanni)
+            return false;
+        else {
+            if(LocalDate.now().isAfter(dateBannissement.toLocalDate()))
+                estBanni = false;
+            return estBanni;
+        }
+    }
+
     public void bannir() {
         estBanni = true;
-         dateBannissement = LocalDateTime.now().plusDays(DUREE_BAN);
+        dateBannissement = LocalDateTime.now().plusDays(DUREE_BAN);
          System.out.println("Vous avez été banni pour 30 jours " + getDateBanissement());
     }
 

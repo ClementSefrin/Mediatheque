@@ -53,9 +53,6 @@ public class Document implements IDocument {
         return titre;
     }
 
-
-
-    //TODO : les fonctions qui sont en-dessous ne changent pas l'état du document
     @Override
     public Abonne emprunteur() {
         return empruntePar;

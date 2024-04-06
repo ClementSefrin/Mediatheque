@@ -2,6 +2,7 @@ package app;
 
 import doc.*;
 import doc.types.*;
+import timer.TimerReservation;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -16,9 +17,11 @@ public class Data implements Runnable {
     private static final String USER = "Admin";
     private static final String PASS = "Admin";
 
-    private static final LinkedList<IDocument> documents = new LinkedList<>();
-    private static final LinkedList<Abonne> abonnes = new LinkedList<>();
+    private static final List<IDocument> documents = new LinkedList<>();
+    private static final List<Abonne> abonnes = new LinkedList<>();
     private static final HashMap<IDocument, Abonne> reservations = new HashMap<>();
+    private static final List<TimerReservation> timerReservationList = new LinkedList<>();
+
 
     @Override
     public void run() {
@@ -82,11 +85,11 @@ public class Data implements Runnable {
         }
     }
 
-    public static LinkedList<IDocument> getDocuments() {
+    public static List<IDocument> getDocuments() {
         return documents;
     }
 
-    public static LinkedList<Abonne> getAbonnes() {
+    public static List<Abonne> getAbonnes() {
         return abonnes;
     }
 
@@ -116,6 +119,13 @@ public class Data implements Runnable {
         for (IDocument d : documents)
             if (d.emprunteur() != null && d.emprunteur().equals(a))
                 return d;
+        return null;
+    }
+
+    public static TimerReservation getTimerReservation(IDocument doc) {
+        for (TimerReservation timerReservation : timerReservationList)
+            if (timerReservation.getDoc().equals(doc))
+                return timerReservation;
         return null;
     }
 
@@ -181,10 +191,26 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static void reserver(IDocument d, Abonne a) {
+    public static void emprunt(IDocument d, Abonne a) throws EmpruntException {
+        synchronized (reservations) {
+            try {
+                d.empruntPar(a);
+                TimerReservation timerReservation = getTimerReservation(d);
+                if (timerReservation != null) {
+                    timerReservation.arreterReservaton();
+                    timerReservationList.remove(timerReservation);
+                }
+            } catch (EmpruntException e) {
+                throw e;
+            }
+        }
+    }
+
+    public static void reserver(IDocument d, Abonne a, Timer timer) {
         synchronized (reservations) {
             try {
                 d.reservationPour(a);
+                timerReservationList.add(new TimerReservation(d, timer));
             } catch (EmpruntException e) {
 
             }
@@ -193,6 +219,16 @@ public class Data implements Runnable {
 
     public static boolean adherentAReserve(IDocument d, Abonne a) {
         return d.reserveur() != null && d.reserveur().equals(a);
+    }
+
+    public static void arreterReservation(IDocument document, Timer timer) throws EmpruntException {
+        timer.cancel();
+        try {
+            retirerReservation(document);
+        } catch (EmpruntException e) {
+            throw e;
+        }
+        System.out.println("La réservation du document " + document + " a été retirée");
     }
 
     public static void retirerReservation(IDocument d) throws EmpruntException {

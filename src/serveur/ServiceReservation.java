@@ -6,6 +6,7 @@ import bttp3.AudioPlayer;
 import codage.Codage;
 import doc.Abonne;
 import timer.AnnulerReservationTask;
+import timer.TimerReservation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -62,23 +63,27 @@ public class ServiceReservation extends Service {
                 if (doc == null)
                     message = "Ce document n'existe pas.";
                 else {
-                    if (Data.estReserve(doc) || Data.estEmprunte(doc)) { // TODO : séparer les deux
-                        if (true) { // TODO :  Trouver un moyen de connaître le temps restant
+                    if (Data.estReserve(doc)) {
+                        TimerReservation timerReservation = Data.getTimerReservation(doc);
+                        if (timerReservation.getTempsRestant() <= 30_000) {
                             AudioPlayer.playAudio("../musique/waiting_song.wav");
                             // Faire patienter le client (30 sec)
-                            Thread.sleep(30_000);
+                            Thread.sleep(90_000);
                             AudioPlayer.stopAudio();
 
                             if (Data.estReserve(doc)) {
                                 message = "Envoûtement vaincu ! ";
                                 break;
                             } else message = "L'envoûtement était trop fort ! Vous avez manqué le document.";
-                        } else message = "Ce document est deja reserve ou emprunte.";
+                        } else message = "Ce document est deja reserve.";
+                    }
+                    else if (Data.estEmprunte(doc)) {
+                        message = "Ce document est deja emprunte.";
                     } else {
                         if (Data.abonnePeutPasEmprunterDVD(doc, abonne)) {
                             message = "Le document est reserve aux personnes majeures";
                         } else {
-                            Data.reserver(doc, abonne);
+                            Data.reserver(doc, abonne, timer);
                             System.out.println(Data.adherentAReserve(doc, abonne));
                             timer.schedule(new AnnulerReservationTask(doc, timer), 120_000); // 2min = 2h
                             message = "Vous avez bien reserve " + doc + "\n";

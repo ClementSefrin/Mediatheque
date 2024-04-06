@@ -97,7 +97,7 @@ public class ServiceEmpruntRetour extends Service {
             out.print(Codage.coder("Le document n'est pas emprunte.\n"));
         }
         else {
-            LocalDateTime date = LocalDateTime.parse(document.dateEmprunt());
+            LocalDateTime date = document.dateEmprunt();
             document.retour();
             // ligne de test en seconde
             // if(LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))){
@@ -129,7 +129,8 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         if(abonne.estBanni() == true){
-            out.print(Codage.coder("Le grand chef Géronimo vous a banni jusqu'au : " + abonne.getDateBanissement() + "\n"));
+            out.print(Codage.coder("Le grand chef Géronimo vous a banni jusqu'au : " + abonne.getDateBanissement()
+                    + "\n"));
             return;
         }
 
@@ -170,7 +171,7 @@ public class ServiceEmpruntRetour extends Service {
         }
         if (line.equalsIgnoreCase("oui")) {
             try {
-                document.empruntPar(abonne);
+                Data.emprunt(document, abonne);
                 out.print(Codage.coder("Emprunt effectue avec succes. Ce jour : " + Document.dateEmpruntFormat()));
             } catch (EmpruntException e) {
                 out.print(Codage.coder(e.getMessage()));

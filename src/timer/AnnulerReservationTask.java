@@ -18,12 +18,10 @@ public class AnnulerReservationTask extends TimerTask {
 
     @Override
     public void run() {
-        timer.cancel();
         try {
-            Data.retirerReservation(document);
+            Data.arreterReservation(document, timer);
         } catch (EmpruntException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("La réservation du document " + document + " a été retirée");
     }
 }

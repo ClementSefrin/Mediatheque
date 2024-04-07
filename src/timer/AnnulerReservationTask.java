@@ -18,10 +18,6 @@ public class AnnulerReservationTask extends TimerTask {
 
     @Override
     public void run() {
-        try {
-            Data.arreterReservation(document, timer);
-        } catch (EmpruntException e) {
-            throw new RuntimeException(e);
-        }
+        document.annulerReservation();
     }
 }

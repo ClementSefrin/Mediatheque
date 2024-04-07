@@ -180,18 +180,12 @@ public class ServiceEmpruntRetour extends Service {
 
             if (line.equalsIgnoreCase("oui")) {
                 try {
-                    Data.emprunt(document, abonne);
+                    document.empruntPar(abonne);
+
                     out.print(Codage.coder("Emprunt effectue avec succes. Vous avez jusqu'au : " +
                         Document.dateFinEmpruntFormat() + " pour rendre le document.\n"));
                 } catch (EmpruntException e) {
                     out.print(Codage.coder(e.getMessage()));
-                }
-            } else {
-                try {
-                    Data.retirerReservation(document);
-                    out.print(Codage.coder("Emprunt annule."));
-                } catch (EmpruntException e) {
-                    throw new RuntimeException(e);
                 }
             }
 

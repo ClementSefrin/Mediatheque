@@ -16,8 +16,6 @@ public class Data implements Runnable {
 
     private static final List<IDocument> documents = new LinkedList<>();
     private static final List<Abonne> abonnes = new LinkedList<>();
-    private static final List<TimerReservation> timerReservationList = new LinkedList<>();
-
 
     @Override
     public void run() {
@@ -104,13 +102,6 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static TimerReservation getTimerReservation(IDocument doc) {
-        for (TimerReservation timerReservation : timerReservationList)
-            if (timerReservation.getDoc().equals(doc))
-                return timerReservation;
-        return null;
-    }
-
     public static boolean abonneExiste(int numero) {
         for (Abonne a : abonnes)
             if (a.getNumero() == numero)
@@ -155,50 +146,17 @@ public class Data implements Runnable {
         return null;
     }
 
-    public static void emprunt(IDocument d, Abonne a) throws EmpruntException {
-        synchronized (d) {
-            try {
-                d.empruntPar(a);
-                TimerReservation timerReservation = getTimerReservation(d);
-                if (timerReservation != null) {
-                    timerReservation.arreterReservation();
-                    timerReservationList.remove(timerReservation);
-                }
-            } catch (EmpruntException e) {
-                throw e;
-            }
-        }
-    }
-
-    public static void reserver(IDocument d, Abonne a, Timer timer) {
-        synchronized (d) {
-            try {
-                d.reservationPour(a);
-                timerReservationList.add(new TimerReservation(d, timer));
-            } catch (EmpruntException e) {
-
-            }
-        }
-    }
-
     public static boolean adherentAReserve(IDocument d, Abonne a) {
         return d.reserveur() != null && d.reserveur().equals(a);
     }
 
-    public static void arreterReservation(IDocument document, Timer timer) throws EmpruntException {
+    public static void arreterReservation(IDocument document, Timer timer) {
+        document.annulerReservation();
         timer.cancel();
-        try {
-            retirerReservation(document);
-        } catch (EmpruntException e) {
-            throw e;
-        }
+
         System.out.println("La reservation du document " + document + " a ete retiree");
     }
 
-
-    public static void retirerReservation(IDocument d) throws EmpruntException {
-        d.reservationPour(null);
-    }
 
     public static boolean DVDPourMajeur(IDocument d) {
         if (d instanceof DVD)

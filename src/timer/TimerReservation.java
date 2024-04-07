@@ -5,28 +5,28 @@ import app.IDocument;
 import doc.EmpruntException;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 public class TimerReservation {
+    private static final long delay = 30_000;
     private final IDocument doc;
     private final Timer timer;
     long heureDebut;
-    
+
     public TimerReservation(IDocument doc, Timer timer) {
         this.doc = doc;
         this.timer = timer;
         this.heureDebut = System.currentTimeMillis();
-    }
-
-    public IDocument getDoc() {
-        return doc;
+        TimerTask annulerReservation = new AnnulerReservationTask(doc, timer);
+        timer.schedule(annulerReservation, delay);
     }
 
     public void arreterReservation() throws EmpruntException {
-        Data.arreterReservation(doc, timer);
+        doc.annulerReservation();
     }
 
     public long getTempsRestant() {
         long tempsEcoule = System.currentTimeMillis() - heureDebut;
-        return 120_000 - tempsEcoule;
+        return delay - tempsEcoule;
     }
 }

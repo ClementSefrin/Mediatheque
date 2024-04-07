@@ -1,67 +1,45 @@
 package client;
 
-//import java.io.IOException;
-import java.util.Scanner;
+import javax.swing.*;
+import java.awt.*;
 
 public class AppliClient {
+    private static final int PORT_RESERVATION = 3000;
+    private static final int PORT_EMPRUNT_RETOUR = 4000;
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        int nbClients = 0;
-
-        while (true) {
-            System.out.print("Voulez-vous ajouter un nouveau client ? (oui/non) : ");
-            String response = scanner.next();
-
-            if (response.equalsIgnoreCase("non")) {
-                break;
-            } else if (!response.equalsIgnoreCase("oui")) {
-                System.out.println("Veuillez repondre par 'oui' ou 'non'");
-                continue;
-            }
-
-            System.out.print("Entrez le port pour le nouveau client : ");
-            int port = scanner.nextInt();
-            Thread clientThread = new Thread(() -> Client.main(new String[]{Integer.toString(port)}));
-            clientThread.start();
-            nbClients++;
-
-            //TODO : ouvrir chaque client dans un terminal separe
-            /*String command;
-            switch (getOS()) {
-                case "mac":
-                    command = "open -a Terminal -n /bin/bash -c \"java -cp /Users/cpx/Desktop/PÉRIODE C/ProjetArchiLog/"
-                            + "Mediatheque/src/client client.Client " + port + "\"";
-                    break;
-                case "windows":
-                    command = "cmd.exe /c start java client.Client " + port;
-                    break;
-                case "linux":
-                    command = "x-terminal-emulator -e java client.Client " + port;
-                    break;
-                default:
-                    System.err.println("Systeme d'exploitation non supporte.");
-                    return;
-            }
-
-            try {
-                ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
-                processBuilder.start();
-                nbClients++;
-            } catch (IOException e) {
-                System.err.println("Erreur lors de l'ouverture d'un nouveau terminal : " + e.getMessage());
-            }*/
-        }
-
-        System.out.println("Nombre total de clients demarres : " + nbClients);
+        SwingUtilities.invokeLater(AppliClient::createAndShowGUI);
     }
 
-    /*private static String getOS() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        return switch (osName) {
-            case "mac os x", "macos", "darwin" -> "mac";
-            case "windows" -> "windows";
-            case "linux" -> "linux";
-            default -> "unknown";
-        };
-    }*/
+    private static void createAndShowGUI() {
+        JFrame frame = new JFrame("Client Application");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Utilisation de BoxLayout pour aligner les composants verticalement
+        frame.getContentPane().add(panel);
+
+        JLabel label = new JLabel("Que voulez-vous faire ?");
+        label.setAlignmentX(Component.CENTER_ALIGNMENT); // Aligner le texte au centre horizontalement
+        panel.add(label);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Utilisation de FlowLayout pour disposer les boutons côte-à-côte
+        panel.add(buttonPanel);
+
+        JButton reservationButton = new JButton("Reserver un document");
+        reservationButton.addActionListener(e -> startClient(PORT_RESERVATION));
+        buttonPanel.add(reservationButton);
+
+        JButton empruntRetourButton = new JButton("Emprunter/Retourner un document");
+        empruntRetourButton.addActionListener(e -> startClient(PORT_EMPRUNT_RETOUR));
+        buttonPanel.add(empruntRetourButton);
+
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    private static void startClient(int port) {
+        Thread clientThread = new Thread(() -> Client.main(new String[]{Integer.toString(port)}));
+        clientThread.start();
+    }
 }

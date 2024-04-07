@@ -29,7 +29,7 @@ public class ServiceEmpruntRetour extends Service {
         try {
             try {
                 System.out.println("Traitement du client : " + this.getClient().getInetAddress() + ","
-                    + this.getClient().getPort());
+                        + this.getClient().getPort());
                 BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
                 PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
 
@@ -37,23 +37,23 @@ public class ServiceEmpruntRetour extends Service {
                 String line = "";
 
                 while (continuer) {
-                    String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
+                    String demandeService = "A quel service souhaitez-vous acceder ? (emprunt/retour) > ";
                     out.println(Codage.coder(demandeService));
                     line = Codage.decoder(in.readLine().trim());
                     ServiceUtils.checkConnectionStatus(line, getClient());
 
-                    while (!line.equalsIgnoreCase("Emprunt") && !line.equalsIgnoreCase("Retour")) {
+                    while (!line.equalsIgnoreCase("emprunt") && !line.equalsIgnoreCase("retour")) {
                         out.println(Codage.coder("Ce service n'est pas disponible.\n" + demandeService));
                         line = Codage.decoder(in.readLine().trim());
                         ServiceUtils.checkConnectionStatus(line, getClient());
                     }
 
-                    if (line.equalsIgnoreCase("Emprunt"))
+                    if (line.equalsIgnoreCase("emprunt"))
                         emprunt(in, out);
-                    else if (line.equalsIgnoreCase("Retour"))
+                    else if (line.equalsIgnoreCase("retour"))
                         retour(in, out);
 
-                    out.println(Codage.coder("Voulez-vous continuer? (Oui/Non)"));
+                    out.println(Codage.coder("Voulez-vous continuer? (oui/non)"));
                     line = Codage.decoder(in.readLine().trim());
                     ServiceUtils.checkConnectionStatus(line, getClient());
 
@@ -61,7 +61,6 @@ public class ServiceEmpruntRetour extends Service {
                         line = "Veuillez entrer une reponse valide.";
                         out.println(Codage.coder(line));
                         line = Codage.decoder(in.readLine().trim());
-                        ;
                         ServiceUtils.checkConnectionStatus(line, getClient());
                     }
 
@@ -179,21 +178,20 @@ public class ServiceEmpruntRetour extends Service {
                 ServiceUtils.checkConnectionStatus(line, getClient());
             }
 
-            if (line.equalsIgnoreCase("oui")) {
-                try {
-                    Data.emprunt(document, abonne);
-                    out.print(Codage.coder("Emprunt effectue avec succes. Ce jour : " + Document.dateEmpruntFormat()
-                        + "\n Vous avez jusqu'au : " + Document.dateFinEmpruntFormat() + " pour rendre le document.\n"));
-                } catch (EmpruntException e) {
-                    out.print(Codage.coder(e.getMessage()));
-                }
-            } else {
-                try {
-                    Data.retirerReservation(document);
-                    out.print(Codage.coder("Emprunt annule."));
-                } catch (EmpruntException e) {
-                    throw new RuntimeException(e);
-                }
+        if (line.equalsIgnoreCase("oui")) {
+            try {
+                Data.emprunt(document, abonne);
+                out.print(Codage.coder("Emprunt effectue avec succes. Vous avez jusqu'au : " +
+                        Document.dateFinEmpruntFormat() + " pour rendre le document.\n"));
+            } catch (EmpruntException e) {
+                out.print(Codage.coder(e.getMessage()));
+            }
+        } else {
+            try {
+                Data.retirerReservation(document);
+                out.print(Codage.coder("Emprunt annule."));
+            } catch (EmpruntException e) {
+                throw new RuntimeException(e);
             }
         }
 

@@ -182,8 +182,8 @@ public class ServiceEmpruntRetour extends Service {
         if (line.equalsIgnoreCase("oui")) {
             try {
                 Data.emprunt(document, abonne);
-                out.print(Codage.coder("Emprunt effectue avec succes. Ce jour : " + Document.dateEmpruntFormat()));
-                // TODO : mettre la date buttoir de retour plutôt que le jour d'emprunt ?
+                out.print(Codage.coder("Emprunt effectue avec succes. Ce jour : " + Document.dateEmpruntFormat()
+                        + "\n Vous avez jusqu'au : " + Document.dateFinEmpruntFormat() + " pour rendre le document.\n"));
             } catch (EmpruntException e) {
                 out.print(Codage.coder(e.getMessage()));
             }

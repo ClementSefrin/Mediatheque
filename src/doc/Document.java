@@ -45,6 +45,10 @@ public class Document implements IDocument {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         return LocalDateTime.now().format(formatter);
     }
+    public static String dateFinEmpruntFormat(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        return LocalDateTime.now().plusWeeks(2).format(formatter);
+    }
 
     @Override
     public void ramdomDocumentAbime(){

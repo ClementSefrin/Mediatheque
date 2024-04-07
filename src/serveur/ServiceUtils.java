@@ -15,9 +15,7 @@ import java.time.LocalDateTime;
 public class ServiceUtils {
 
     public static void checkConnectionStatus(String str,Socket client) throws FinConnexionException {
-        if (str.equalsIgnoreCase("quit")) {
-            endConnection(client);
-        }
+        if (str.equalsIgnoreCase("quit")) endConnection(client);
     }
 
     public static void endConnection(Socket client) throws FinConnexionException {
@@ -32,11 +30,11 @@ public class ServiceUtils {
     public static int numIsCorrect(String str) {
         try {
             int n = Integer.parseInt(str);
-            if (n < 1)
-                throw new NumberFormatException();
+            if (n < 1) throw new NumberFormatException();
             return n;
         } catch (NumberFormatException e) {
             return -1;
         }
     }
 }
+

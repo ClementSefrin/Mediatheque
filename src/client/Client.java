@@ -9,13 +9,12 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Client {
-    private final static int PORT = 4000;
     private final static String HOST = "localhost";
 
     public static void main(String[] args) {
         Socket socket = null;
         try {
-            socket = new Socket(HOST, PORT);
+            socket = new Socket(HOST, Integer.parseInt(args[0]));
             BufferedReader sin = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter sout = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader clavier = new BufferedReader(new InputStreamReader(System.in));
@@ -25,14 +24,13 @@ public class Client {
 
             while (socket.isConnected()) {
                 inLine = sin.readLine();
-                if (inLine == null || inLine.equalsIgnoreCase("quit")) {
+                if (inLine == null || inLine.equalsIgnoreCase("quitter"))
                     break;
-                }
                 System.out.println(Codage.decoder(inLine));
 
                 outLine = clavier.readLine();
                 sout.println(Codage.coder(outLine));
-                if (outLine.equalsIgnoreCase("quit")) {
+                if (outLine.equalsIgnoreCase("quitter")) {
                     break;
                 }
             }

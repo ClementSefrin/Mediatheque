@@ -30,9 +30,9 @@ public class Abonne {
     }
 
     public boolean estMajeur() {
-        LocalDate aujourdHui = LocalDate.now();
-        LocalDate dateNaiss = dateNaissance.toLocalDate();
-        return aujourdHui.minusYears(AGE_MAJEUR).isAfter(dateNaiss);
+        LocalDate aujourdhui = LocalDate.now();
+        LocalDate dateNaissance = this.dateNaissance.toLocalDate();
+        return aujourdhui.minusYears(AGE_MAJEUR).isAfter(dateNaissance);
     }
 
     public boolean estBanni() {
@@ -48,14 +48,12 @@ public class Abonne {
     public void bannir() {
         estBanni = true;
         dateBannissement = LocalDateTime.now().plusDays(DUREE_BAN);
-         System.out.println("Vous avez été banni pour 30 jours " + getDateBanissement());
+         System.out.println("Vous avez ete banni pour 30 jours " + getDateBannissement());
     }
 
-    public String getDateBanissement() {
+    public String getDateBannissement() {
         System.out.println(dateBannissement);
-        if (dateBannissement == null) {
-            return null;
-        }
+        if (dateBannissement == null) return null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         return dateBannissement.format(formatter);
     }
@@ -65,6 +63,7 @@ public class Abonne {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Abonne abonne = (Abonne) o;
-        return numero == abonne.numero && Objects.equals(nom, abonne.nom) && Objects.equals(dateNaissance, abonne.dateNaissance);
+        return numero == abonne.numero && Objects.equals(nom, abonne.nom)
+                && Objects.equals(dateNaissance, abonne.dateNaissance);
     }
 }

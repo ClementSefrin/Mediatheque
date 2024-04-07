@@ -17,7 +17,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class ServiceReservation extends Service {
-    private Timer timer = new Timer(); // TODO : mettre en partagé
+    private Timer timer = new Timer();
     private TimerTask annulerReservationTask;
 
     public ServiceReservation(Socket socket) {
@@ -28,8 +28,8 @@ public class ServiceReservation extends Service {
     public void run() {
         try {
             try {
-                System.out.println("Traitement du client : " + this.getClient().getInetAddress() + "," + this.getClient().getPort());
-
+                System.out.println("Traitement du client : " + this.getClient().getInetAddress() + ","
+                        + this.getClient().getPort());
             BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
             PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
 
@@ -44,12 +44,11 @@ public class ServiceReservation extends Service {
                 ServiceUtils.checkConnectionStatus(line, getClient());
             }
 
-
             Abonne abonne = Data.getAbonne(numeroAdherent);
             boolean continuer = true;
-            if(abonne.estBanni()){
-                out.print(Codage.coder("Le grand chef Géronimo vous a banni jusqu'au : " + abonne
-                        .getDateBanissement() + "\n"));
+            if (abonne.estBanni()) {
+                out.print(Codage.coder("Le grand chef Geronimo vous a banni jusqu'au : "
+                        + abonne.getDateBannissement() + "\n"));
                 continuer = false;
             }
 
@@ -67,16 +66,17 @@ public class ServiceReservation extends Service {
                     if (Data.estReserve(doc)) {
                         TimerReservation timerReservation = Data.getTimerReservation(doc);
                         if (timerReservation.getTempsRestant() <= 30_000) {
+                            out.println(Codage.coder("La reservation de ce document touche a sa fin. Veuillez " +
+                                    "patienter quelques instants en ecoutant notre musique celeste."));
                             AudioPlayer.playAudio("../musique/waiting_song.wav");
-                            // Faire patienter le client (1m30)
-                            Thread.sleep(90_000);
+                            Thread.sleep(90_000); // Faire patienter le client (1m30)
                             AudioPlayer.stopAudio();
 
                             if (Data.estReserve(doc)) {
-                                message = "Envoûtement vaincu ! ";
+                                message = "L'envoutement etait trop fort ! Vous auriez du faire une offrande plus" +
+                                        " importante au grand chaman.";
                                 break;
-                            } else message = "L'envoûtement était trop fort ! Vous auriez du faire une offrande plus" +
-                                    " importante au grand chaman.";
+                            } else message = "Envoutement vaincu ! ";
                         } else message = "Ce document est deja reserve.";
                     }
                     else if (Data.estEmprunte(doc)) {
@@ -92,7 +92,7 @@ public class ServiceReservation extends Service {
                         }
                     }
                 }
-                out.println(Codage.coder(message + "\nVoulez-vous continuer ? (oui/non)"));
+                out.println(Codage.coder(message + "\nVoulez-vous continuer ? (oui/non) > "));
                 continuer = Codage.decoder(in.readLine()).trim().equalsIgnoreCase("oui");
                 ServiceUtils.checkConnectionStatus(line, getClient());
             }

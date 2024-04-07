@@ -10,10 +10,6 @@ public class Livre extends Document {
         this.nbPages = nbPages;
     }
 
-    public int nbPages() {
-        return this.nbPages;
-    }
-
     @Override
     public String toString() {
         return super.toString() + " | Pages : " + nbPages;

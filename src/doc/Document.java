@@ -4,7 +4,6 @@ import app.Data;
 import app.IDocument;
 import doc.types.DVD;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -16,8 +15,8 @@ public class Document implements IDocument {
     private LocalDateTime dateEmprunt = null;
     private final int numero;
     private final String titre;
-    private static boolean documentAbime = false;
-    private static final int PROBA_DOC_ABIME = 100; // probabilité de 1/100
+    private static boolean estDocumentAbime = false;
+    private static final int PROBA_DOC_ABIME = 100; // probabilite de 1/100
     private static final int DOC_EST_ABIME = 0;
 
 
@@ -48,19 +47,19 @@ public class Document implements IDocument {
     }
 
     @Override
-    public void RamdomDocumentAbime(){
+    public void ramdomDocumentAbime(){
         Random rand = new Random();
         int randomNum = rand.nextInt(PROBA_DOC_ABIME);
-        documentAbime = (randomNum == DOC_EST_ABIME);
+        estDocumentAbime = (randomNum == DOC_EST_ABIME);
     }
-
 
     @Override
     public boolean getDocumentAbime() {
-        return documentAbime;
+        return estDocumentAbime;
     }
+
     @Override
-    public int numero() {
+    public int getNumero() {
         return numero;
     }
 

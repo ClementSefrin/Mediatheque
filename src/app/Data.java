@@ -9,9 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 public class Data implements Runnable {
     private static final String DB_URL = "jdbc:mariadb://194.164.50.105:3306/MediaTech";
     private static final String USER = "Admin";
@@ -72,7 +69,6 @@ public class Data implements Runnable {
             }
 
             //Récupération des réservations
-            //Récupération des emprunts
             for (int i = 1; i <= 15; i++) {
                 reservations.put(getDocument(i), getAbonne(1));
             }
@@ -98,20 +94,16 @@ public class Data implements Runnable {
     }
 
     public static Abonne getAbonne(int numero) {
-        for (Abonne a : abonnes) {
-            if (a.getNumero() == numero) {
+        for (Abonne a : abonnes)
+            if (a.getNumero() == numero)
                 return a;
-            }
-        }
         return null;
     }
 
     public static IDocument getDocument(int numero) {
-        for (IDocument d : documents) {
-            if (d.numero() == numero) {
+        for (IDocument d : documents)
+            if (d.getNumero() == numero)
                 return d;
-            }
-        }
         return null;
     }
 
@@ -121,7 +113,6 @@ public class Data implements Runnable {
                 return d;
         return null;
     }
-
 
     public static TimerReservation getTimerReservation(IDocument doc) {
         for (TimerReservation timerReservation : timerReservationList)
@@ -155,14 +146,14 @@ public class Data implements Runnable {
         for (IDocument doc : documents) {
             if (doc.reserveur() != null && doc.reserveur().equals(ab)) {
                 if (empty) {
-                    sb.append("Bonjour " + ab.getNom() + ". Voici les documents que vous avez reserves : \n");
+                    sb.append("Bonjour " + ab.getNom() + ". Voici les documents que vous avez reserves :\n");
                     empty = false;
                 }
                 sb.append(doc.toString() + "\n");
             }
         }
         if (empty) {
-            sb.append("Vous n'avez aucun documents reserves.\n");
+            sb.append("Vous n'avez fait aucune reservation.\n");
         }
         return sb.toString();
     }
@@ -180,7 +171,7 @@ public class Data implements Runnable {
             }
         }
         if (empty) {
-            sb.append("Vous n'avez aucun documents empruntes.\n");
+            sb.append("Vous n'avez aucun document emprunte.\n");
         }
         return sb.toString();
     }
@@ -198,7 +189,7 @@ public class Data implements Runnable {
                 d.empruntPar(a);
                 TimerReservation timerReservation = getTimerReservation(d);
                 if (timerReservation != null) {
-                    timerReservation.arreterReservaton();
+                    timerReservation.arreterReservation();
                     timerReservationList.remove(timerReservation);
                 }
             } catch (EmpruntException e) {
@@ -229,7 +220,7 @@ public class Data implements Runnable {
         } catch (EmpruntException e) {
             throw e;
         }
-        System.out.println("La réservation du document " + document + " a été retirée");
+        System.out.println("La reservation du document " + document + " a ete retiree");
     }
 
 

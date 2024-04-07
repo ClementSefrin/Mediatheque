@@ -21,7 +21,7 @@ public class TimerReservation {
         return doc;
     }
 
-    public void arreterReservaton() throws EmpruntException {
+    public void arreterReservation() throws EmpruntException {
         Data.arreterReservation(doc, timer);
     }
 

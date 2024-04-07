@@ -3,6 +3,7 @@ package doc;
 import app.Data;
 import app.IDocument;
 import doc.types.DVD;
+import timer.TimerReservation;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Timer;
 
 
 public class Document implements IDocument {
@@ -19,6 +21,7 @@ public class Document implements IDocument {
     private Abonne empruntePar = null;
     private LocalDateTime dateEmprunt = null;
     private LinkedList<String> alerteDisponibilite;
+    private TimerReservation timerReservation;
     private final int numero;
     private final String titre;
     private static boolean estDocumentAbime = false;
@@ -53,13 +56,8 @@ public class Document implements IDocument {
     }
 
     @Override
-    public LocalDateTime dateEmprunt() {
-        return dateEmprunt;
-    }
-
-    public static String dateEmpruntFormat() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-        return LocalDateTime.now().format(formatter);
+    public TimerReservation getTimerReservation() {
+        return timerReservation;
     }
 
     public static String dateFinEmpruntFormat() {
@@ -100,11 +98,27 @@ public class Document implements IDocument {
     }
 
     @Override
-    public void reservationPour(Abonne ab) throws EmpruntException {
+    public LocalDateTime dateEmprunt() {
+        return dateEmprunt;
+    }
+
+    @Override
+    public void reservationPour(Abonne ab, Timer timer) throws EmpruntException {
         synchronized (this) {
-            if (reservePar == null && empruntePar == null)
-                reservePar = ab;
+            if (reservePar != null)
+                throw new EmpruntException("Le document est deja emprunte.");
+            if (empruntePar != null)
+                throw new EmpruntException("Le document est reserve par une autre personne.");
+            if (Data.abonnePeutPasEmprunterDVD(this, ab))
+                throw new EmpruntException("Ce DVD est reserve aux adultes.");
+            reservePar = ab;
+            timerReservation = new TimerReservation(this, timer);
         }
+    }
+
+    @Override
+    public void annulerReservation() {
+        reservePar = null;
     }
 
     @Override
@@ -119,6 +133,7 @@ public class Document implements IDocument {
             reservePar = null;
             empruntePar = ab;
             dateEmprunt = LocalDateTime.now();
+            timerReservation = null;
         }
     }
 

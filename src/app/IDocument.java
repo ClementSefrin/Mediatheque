@@ -2,8 +2,10 @@ package app;
 
 import doc.Abonne;
 import doc.EmpruntException;
+import timer.TimerReservation;
 
 import java.time.LocalDateTime;
+import java.util.Timer;
 
 
 public interface IDocument {
@@ -23,7 +25,9 @@ public interface IDocument {
 
     // precondition : ni reserve ni emprunte
     // EmpruntException si ab n’a pas le droit de reserver le document
-    void reservationPour(Abonne ab) throws EmpruntException;
+    void reservationPour(Abonne ab, Timer timer) throws EmpruntException;
+
+    void annulerReservation();
 
     // precondition : libre ou reserve par l’abonne qui vient emprunter
     // EmpruntException si ab n’a pas le droit d’emprunter le document
@@ -34,5 +38,5 @@ public interface IDocument {
 
     boolean ajoutAlerteDisponibilite(String mail);
 
-
+    TimerReservation getTimerReservation();
 }

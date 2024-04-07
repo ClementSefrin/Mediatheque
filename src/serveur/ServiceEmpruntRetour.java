@@ -29,7 +29,7 @@ public class ServiceEmpruntRetour extends Service {
         try {
             try {
                 System.out.println("Traitement du client : " + this.getClient().getInetAddress() + ","
-                        + this.getClient().getPort());
+                    + this.getClient().getPort());
                 BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
                 PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
 
@@ -178,23 +178,17 @@ public class ServiceEmpruntRetour extends Service {
                 ServiceUtils.checkConnectionStatus(line, getClient());
             }
 
-        if (line.equalsIgnoreCase("oui")) {
-            try {
-                Data.emprunt(document, abonne);
-                out.print(Codage.coder("Emprunt effectue avec succes. Vous avez jusqu'au : " +
+            if (line.equalsIgnoreCase("oui")) {
+                try {
+                    document.empruntPar(abonne);
+                    out.print(Codage.coder("Emprunt effectue avec succes. Vous avez jusqu'au : " +
                         Document.dateFinEmpruntFormat() + " pour rendre le document.\n"));
-            } catch (EmpruntException e) {
-                out.print(Codage.coder(e.getMessage()));
+                } catch (EmpruntException e) {
+                    out.print(Codage.coder(e.getMessage()));
+                }
             }
-        } else {
-            try {
-                Data.retirerReservation(document);
-                out.print(Codage.coder("Emprunt annule."));
-            } catch (EmpruntException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
-        out.print(Codage.coder("\n"));
+            out.print(Codage.coder("\n"));
+        }
     }
 }

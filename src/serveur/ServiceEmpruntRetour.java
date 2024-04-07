@@ -37,23 +37,23 @@ public class ServiceEmpruntRetour extends Service {
                 String line = "";
 
                 while (continuer) {
-                    String demandeService = "A quel service souhaitez-vous acceder? (Emprunt/Retour)";
+                    String demandeService = "A quel service souhaitez-vous acceder ? (emprunt/retour) > ";
                     out.println(Codage.coder(demandeService));
                     line = Codage.decoder(in.readLine());
                     ServiceUtils.checkConnectionStatus(line, getClient());
 
-                    while (!line.equalsIgnoreCase("Emprunt") && !line.equalsIgnoreCase("Retour")) {
+                    while (!line.equalsIgnoreCase("emprunt") && !line.equalsIgnoreCase("retour")) {
                         out.println(Codage.coder("Ce service n'est pas disponible.\n" + demandeService));
                         line = Codage.decoder(in.readLine());
                         ServiceUtils.checkConnectionStatus(line, getClient());
                     }
 
-                    if (line.equalsIgnoreCase("Emprunt"))
+                    if (line.equalsIgnoreCase("emprunt"))
                         emprunt(in, out);
-                    else if (line.equalsIgnoreCase("Retour"))
+                    else if (line.equalsIgnoreCase("retour"))
                         retour(in, out);
 
-                    out.println(Codage.coder("Voulez-vous continuer? (Oui/Non)"));
+                    out.println(Codage.coder("Voulez-vous continuer? (oui/non)"));
                     line = Codage.decoder(in.readLine());
                     ServiceUtils.checkConnectionStatus(line, getClient());
 
@@ -147,7 +147,7 @@ public class ServiceEmpruntRetour extends Service {
             return;
         }
 
-        String listeReservations = Data.afficherDocumentsEmpruntes(abonne);
+        String listeReservations = Data.afficherDocumentsReserves(abonne);
         out.println(Codage.coder(listeReservations + abonne.getNom() + ", quel est le numero"
                 + " du document que vous voulez emprunter ? > "));
 
@@ -182,8 +182,8 @@ public class ServiceEmpruntRetour extends Service {
         if (line.equalsIgnoreCase("oui")) {
             try {
                 Data.emprunt(document, abonne);
-                out.print(Codage.coder("Emprunt effectue avec succes. Ce jour : " + Document.dateEmpruntFormat()
-                        + "\n Vous avez jusqu'au : " + Document.dateFinEmpruntFormat() + " pour rendre le document.\n"));
+                out.print(Codage.coder("Emprunt effectue avec succes. Vous avez jusqu'au : " +
+                        Document.dateFinEmpruntFormat() + " pour rendre le document.\n"));
             } catch (EmpruntException e) {
                 out.print(Codage.coder(e.getMessage()));
             }

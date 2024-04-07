@@ -38,24 +38,19 @@ public class Abonne {
     public void debannir() {
         estBanni = false;
         dateBannissement = null;
-        System.out.println("L'abonné a été débanni.");
+        System.out.println("L'abonne a ete debanni.");
     }
 
 
     public boolean estBanni() {
-        if (!estBanni) {
-            return false;
-        }
-        if (LocalDateTime.now().isAfter(dateBannissement)) {
+        if (LocalDateTime.now().isAfter(dateBannissement))
             debannir();
-            return false;
-        }
-        return true;
+        return estBanni ;
     }
 
     public void bannir() {
         estBanni = true;
-        // pour testé un bannissement de 1 minute
+        // pour tester un bannissement de 1 minute
         //dateBannissement = LocalDateTime.now().plusMinutes(0);
         dateBannissement = LocalDateTime.now().plusDays(DUREE_BAN);
          System.out.println("Vous avez ete banni pour 30 jours " + getDateBannissement());

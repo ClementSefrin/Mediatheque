@@ -137,7 +137,7 @@ public class Data implements Runnable {
     }
 
     public static boolean estReserve(IDocument d) {
-        return d.emprunteur() != null;
+        return d.reserveur() != null;
     }
 
     public static String afficherDocumentsReserves(Abonne ab) {
@@ -154,24 +154,6 @@ public class Data implements Runnable {
         }
         if (empty) {
             sb.append("Vous n'avez fait aucune reservation.\n");
-        }
-        return sb.toString();
-    }
-
-    public static String afficherDocumentsEmpruntes(Abonne ab) {
-        StringBuilder sb = new StringBuilder();
-        boolean empty = true;
-        for (IDocument doc : documents) {
-            if (doc.emprunteur() != null && doc.emprunteur().equals(ab)) {
-                if (empty) {
-                    sb.append("Bonjour " + ab.getNom() + ". Voici les documents que vous avez empruntes : \n");
-                    empty = false;
-                }
-                sb.append(doc.toString() + "\n");
-            }
-        }
-        if (empty) {
-            sb.append("Vous n'avez aucun document emprunte.\n");
         }
         return sb.toString();
     }

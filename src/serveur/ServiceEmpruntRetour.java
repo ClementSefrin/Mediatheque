@@ -99,17 +99,25 @@ public class ServiceEmpruntRetour extends Service {
         else {
             abonne = document.emprunteur();
             LocalDateTime date = document.dateEmprunt();
-            document.retour();
-            // ligne de test en seconde
-             if(LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))){
-           // if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
+            document.RamdomDocumentAbime();
+            if(document.getDocumentAbime()){
                 abonne.bannir();
-                out.print(Codage.coder("Document retourne avec succes, cependant pour des raisons de retard, "
-                        + abonne.getNom()  +
-                        " le grand chef Géronimo a décidé de vous a banni pour 1 mois.\n" +"Jusqu'au :" + abonne.getDateBanissement() + "\n"));
+                out.print(Codage.coder("Le document a été retourné, cependant je constate " + abonne.getNom()+ ", que vous avez abîmer le document.\n " +
+                        "Geronimo est intransigeant sur l'état de retour des documents empruntés !\n" +
+                        " Vous êtes banni jusqu'au : " + abonne.getDateBanissement() + " et la sentance est irrévoquable !\n"));
             }
             else {
-                out.print(Codage.coder("Document retourne avec succes.\n"));
+                document.retour();
+                // ligne de test en seconde
+                //if (LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))) {
+                     if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
+                    abonne.bannir();
+                    out.print(Codage.coder("Document retourne avec succes, cependant pour des raisons de retard, "
+                            + abonne.getNom() +
+                            " le grand chef Géronimo a décidé de vous a banni pour 1 mois.\n" + "Jusqu'au :" + abonne.getDateBanissement() + "\n"));
+                } else {
+                    out.print(Codage.coder("Document retourne avec succes.\n"));
+                }
             }
         }
     }

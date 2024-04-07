@@ -7,6 +7,7 @@ import doc.types.DVD;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 
 public class Document implements IDocument {
@@ -15,6 +16,10 @@ public class Document implements IDocument {
     private LocalDateTime dateEmprunt = null;
     private final int numero;
     private final String titre;
+    private static boolean documentAbime = false;
+    private static final int PROBA_DOC_ABIME = 100;
+    private static final int DOC_EST_ABIME = 0;
+
 
     public Document(int numero, String titre, Abonne abonne, EtatDemande etat) {
         this.numero = numero;
@@ -42,6 +47,18 @@ public class Document implements IDocument {
         return LocalDateTime.now().format(formatter);
     }
 
+    @Override
+    public void RamdomDocumentAbime(){
+        Random rand = new Random();
+        int randomNum = rand.nextInt(PROBA_DOC_ABIME);
+        documentAbime = (randomNum == DOC_EST_ABIME);
+    }
+
+
+    @Override
+    public boolean getDocumentAbime() {
+        return documentAbime;
+    }
     @Override
     public int numero() {
         return numero;

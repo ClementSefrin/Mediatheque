@@ -19,6 +19,10 @@ public interface IDocument {
 
     String getTitre();
 
+    boolean getDocumentAbime();
+
+    void RamdomDocumentAbime();
+
     // precondition : ni réservé ni emprunté
     // EmpruntException si ab n’a pas le droit de réserver CE document
     void reservationPour(Abonne ab) throws EmpruntException;

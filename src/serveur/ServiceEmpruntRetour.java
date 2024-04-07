@@ -147,7 +147,7 @@ public class ServiceEmpruntRetour extends Service {
             return;
         }
 
-        String listeReservations = Data.afficherDocumentsEmpruntes(abonne);
+        String listeReservations = Data.afficherDocumentsReserves(abonne);
         out.println(Codage.coder(listeReservations + abonne.getNom() + ", quel est le numero"
                 + " du document que vous voulez emprunter ? > "));
 

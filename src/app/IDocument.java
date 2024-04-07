@@ -32,4 +32,7 @@ public interface IDocument {
     // retour d’un document ou annulation d'une reservation
     void retour();
 
+    boolean ajoutAlerteDisponibilite(String mail);
+
+
 }

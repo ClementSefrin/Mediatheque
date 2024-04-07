@@ -16,7 +16,6 @@ public class Data implements Runnable {
 
     private static final List<IDocument> documents = new LinkedList<>();
     private static final List<Abonne> abonnes = new LinkedList<>();
-    private static final HashMap<IDocument, Abonne> reservations = new HashMap<>();
     private static final List<TimerReservation> timerReservationList = new LinkedList<>();
 
 
@@ -67,12 +66,6 @@ public class Data implements Runnable {
                         documents.add(new DVD(numero, titre, resultSet2.getBoolean("Adulte")));
                 }
             }
-
-            //Récupération des réservations
-            for (int i = 1; i <= 15; i++) {
-                reservations.put(getDocument(i), getAbonne(1));
-            }
-
         } catch (ClassNotFoundException e1) {
             System.err.print("ClassNotFoundException: ");
             System.err.println(e1.getMessage());
@@ -89,9 +82,6 @@ public class Data implements Runnable {
         return abonnes;
     }
 
-    public static HashMap<IDocument, Abonne> getReservations() {
-        return reservations;
-    }
 
     public static Abonne getAbonne(int numero) {
         for (Abonne a : abonnes)
@@ -137,7 +127,7 @@ public class Data implements Runnable {
     }
 
     public static boolean estReserve(IDocument d) {
-        return d.emprunteur() != null;
+        return d.reserveur() != null;
     }
 
     public static String afficherDocumentsReserves(Abonne ab) {
@@ -184,7 +174,7 @@ public class Data implements Runnable {
     }
 
     public static void emprunt(IDocument d, Abonne a) throws EmpruntException {
-        synchronized (reservations) {
+        synchronized (d) {
             try {
                 d.empruntPar(a);
                 TimerReservation timerReservation = getTimerReservation(d);
@@ -199,7 +189,7 @@ public class Data implements Runnable {
     }
 
     public static void reserver(IDocument d, Abonne a, Timer timer) {
-        synchronized (reservations) {
+        synchronized (d) {
             try {
                 d.reservationPour(a);
                 timerReservationList.add(new TimerReservation(d, timer));

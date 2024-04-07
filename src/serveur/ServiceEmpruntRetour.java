@@ -97,13 +97,16 @@ public class ServiceEmpruntRetour extends Service {
             out.print(Codage.coder("Le document n'est pas emprunte.\n"));
         }
         else {
+            abonne = document.emprunteur();
             LocalDateTime date = document.dateEmprunt();
             document.retour();
             // ligne de test en seconde
-            // if(LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))){
-            if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
+             if(LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))){
+           // if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
                 abonne.bannir();
-                out.print(Codage.coder("Document retourne avec succes, cependant le grand chef Géronimo vous a banni pour 1 mois.\n"));
+                out.print(Codage.coder("Document retourne avec succes, cependant pour des raisons de retard, "
+                        + abonne.getNom()  +
+                        " le grand chef Géronimo a décidé de vous a banni pour 1 mois.\n" +"Jusqu'au :" + abonne.getDateBanissement() + "\n"));
             }
             else {
                 out.print(Codage.coder("Document retourne avec succes.\n"));
@@ -129,15 +132,15 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         if(abonne.estBanni() == true){
-            out.print(Codage.coder("Le grand chef Géronimo vous a banni jusqu'au : " + abonne.getDateBanissement()
-                    + "\n"));
+            out.print(Codage.coder("Bonjour "+ abonne.getNom() +
+                    ", le grand chef Géronimo vous a banni jusqu'au : " + abonne.getDateBanissement() + "\n"));
             return;
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append(Data.afficherDocumentsReserves(abonne));
         //sb.append(Data.afficherDocumentsEmpruntes(abonne));
-        sb.append("Entrez le numero du document que vous voulez emprunter : ");
+        sb.append(abonne.getNom() + " quel numero du document que vous voulez emprunter : ");
         out.println(Codage.coder(sb.toString()));
 
         int numDocument;
@@ -163,7 +166,7 @@ public class ServiceEmpruntRetour extends Service {
         out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant? (Oui/Non)\n" + document.getTitre()));
         line = Codage.decoder(in.readLine());
         ServiceUtils.checkConnectionStatus(line, getClient());
-        while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
+        while (!line.equalsIgnoreCase("oui") && !line.equalsIgnoreCase("non")) {
             line = "Veuillez entrer une reponse valide.";
             out.println(Codage.coder(line));
             line = Codage.decoder(in.readLine());
@@ -177,7 +180,12 @@ public class ServiceEmpruntRetour extends Service {
                 out.print(Codage.coder(e.getMessage()));
             }
         } else {
-            out.print(Codage.coder("Emprunt annule."));
+            try {
+                Data.retirerReservation(document);
+                out.print(Codage.coder("Emprunt annule."));
+            } catch (EmpruntException e) {
+                throw new RuntimeException(e);
+            }
         }
         out.print(Codage.coder("\n"));
     }

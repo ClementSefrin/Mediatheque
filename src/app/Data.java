@@ -122,6 +122,7 @@ public class Data implements Runnable {
         return null;
     }
 
+
     public static TimerReservation getTimerReservation(IDocument doc) {
         for (TimerReservation timerReservation : timerReservationList)
             if (timerReservation.getDoc().equals(doc))
@@ -230,6 +231,7 @@ public class Data implements Runnable {
         }
         System.out.println("La réservation du document " + document + " a été retirée");
     }
+
 
     public static void retirerReservation(IDocument d) throws EmpruntException {
         d.reservationPour(null);

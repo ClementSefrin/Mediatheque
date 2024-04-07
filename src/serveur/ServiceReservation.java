@@ -5,6 +5,9 @@ import app.Data;
 import bttp3.AudioPlayer;
 import codage.Codage;
 import doc.Abonne;
+import doc.Document;
+import doc.EmpruntException;
+import doc.ReservationInterditeException;
 import timer.AnnulerReservationTask;
 import timer.TimerReservation;
 
@@ -85,10 +88,30 @@ public class ServiceReservation extends Service {
                         if (Data.abonnePeutPasEmprunterDVD(doc, abonne)) {
                             message = "Le document est reserve aux personnes majeures";
                         } else {
-                            Data.reserver(doc, abonne, timer);
-                            System.out.println(Data.adherentAReserve(doc, abonne));
-                            timer.schedule(new AnnulerReservationTask(doc, timer), 120_000); // 2min = 2h
-                            message = "Vous avez bien reserve " + doc + "\n";
+                            out.println(Codage.coder("Etes-vous sur de vouloir reserver le document suivant : "
+                                    + doc.getTitre() + " ? (oui/non) > "));
+
+                            while (!line.equalsIgnoreCase("oui") && !line.equalsIgnoreCase("non")) {
+                                line = "Veuillez entrer une reponse valide.";
+                                out.println(Codage.coder(line));
+                                line = Codage.decoder(in.readLine());
+                                ServiceUtils.checkConnectionStatus(line, getClient());
+                            }
+
+                            if (line.equalsIgnoreCase("oui")) {
+                                // try {
+                                    Data.reserver(doc, abonne, timer);
+                                    System.out.println(Data.adherentAReserve(doc, abonne));
+                                    timer.schedule(new AnnulerReservationTask(doc, timer), 120_000); // 2min = 2h
+                                    message = "Vous avez bien reserve " + doc.getTitre()
+                                            + "\nVous avez deux heures pour venir l'emprunter";
+                                //TODO : gérer avec exception la réservation d'un document pour adulte par un mineur
+                                /*} catch (ReservationInterditeException e) {
+                                    out.print(Codage.coder(e.getMessage()));
+                                }*/
+                            } else {
+                                message = "Reservation annulee";
+                            }
                         }
                     }
                 }

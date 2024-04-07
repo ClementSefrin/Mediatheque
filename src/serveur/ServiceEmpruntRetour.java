@@ -167,8 +167,7 @@ public class ServiceEmpruntRetour extends Service {
         document = (Document) Data.getDocument(numDocument);
 
         out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant : \n" + document.getTitre()
-                + " ? (oui/non) > "
-                ));
+                + " ? (oui/non) > "));
         line = Codage.decoder(in.readLine());
         ServiceUtils.checkConnectionStatus(line, getClient());
 

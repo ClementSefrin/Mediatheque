@@ -181,6 +181,7 @@ public class ServiceEmpruntRetour extends Service {
             if (line.equalsIgnoreCase("oui")) {
                 try {
                     document.empruntPar(abonne);
+
                     out.print(Codage.coder("Emprunt effectue avec succes. Vous avez jusqu'au : " +
                         Document.dateFinEmpruntFormat() + " pour rendre le document.\n"));
                 } catch (EmpruntException e) {

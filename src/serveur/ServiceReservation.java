@@ -7,6 +7,9 @@ import codage.Codage;
 import doc.Abonne;
 import doc.Document;
 import doc.EmpruntException;
+import doc.Document;
+import doc.EmpruntException;
+import doc.ReservationInterditeException;
 import timer.AnnulerReservationTask;
 import timer.TimerReservation;
 
@@ -126,7 +129,7 @@ public class ServiceReservation extends Service {
                                 }
                             } else message = "Ce document est deja reserve.";
                         } else if (Data.estEmprunte(doc)) {
-                            out.println(Codage.coder("Ce document est déjà emprunté. Voulez-vous recevoir une" +
+                            out.println(Codage.coder("Ce document est dÃ©jÃ  empruntÃ©. Voulez-vous recevoir une" +
                                 " alerte lorsque le document sera de nouveau disponible? (Oui/Non)"));
 
                             line = Codage.decoder(in.readLine().trim());
@@ -140,8 +143,8 @@ public class ServiceReservation extends Service {
                             }
 
                             if (line.equalsIgnoreCase("oui")) {
-                                out.println(Codage.coder("Entrez l'adresse mail à laquelle vous souhaitez être" +
-                                    " alerté."));
+                                out.println(Codage.coder("Entrez l'adresse mail Ã  laquelle vous souhaitez Ãªtre" +
+                                    " alertÃ©."));
                                 line = Codage.decoder(in.readLine().trim());
                                 ServiceUtils.checkConnectionStatus(line, getClient());
                                 while (!checkEmail(line)) {
@@ -153,7 +156,7 @@ public class ServiceReservation extends Service {
 
                                 boolean ajout = doc.ajoutAlerteDisponibilite(line);
                                 message = ajout ? "Vous recevrez une alerte lorsque le document sera de nouveau" +
-                                    " disponible." : "Vous êtes déjà inscrit pour recevoir une alerte.";
+                                    " disponible." : "Vous Ãªtes dÃ©jÃ  inscrit pour recevoir une alerte.";
                             } else {
                                 message = "";
                             }

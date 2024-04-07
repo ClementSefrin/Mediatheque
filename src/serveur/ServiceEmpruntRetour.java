@@ -106,7 +106,7 @@ public class ServiceEmpruntRetour extends Service {
             } else {
                 document.retour();
                 // ligne de test en seconde
-                if (date.isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))) {
+                if (LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))) {
                     //  if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
                     abonne.bannir();
                     message = "Document retourne avec succes, mais en retard.\n" + abonne.getNom()

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 public class ServiceEmpruntRetour extends Service {
     private Abonne abonne;
-    private final static int DUREE_MAX_RENDU_SEMAINE = 2;
+    private final static int DUREE_MAX_RENDU_SEMAINE = 2; // temps pour rendre un document
 
     public ServiceEmpruntRetour(Socket socket) {
         super(socket);

@@ -17,7 +17,7 @@ public class Document implements IDocument {
     private final int numero;
     private final String titre;
     private static boolean documentAbime = false;
-    private static final int PROBA_DOC_ABIME = 100;
+    private static final int PROBA_DOC_ABIME = 100; // probabilité de 1/100
     private static final int DOC_EST_ABIME = 0;
 
 

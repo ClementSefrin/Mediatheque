@@ -78,7 +78,7 @@ public class ServiceEmpruntRetour extends Service {
 
     private void retour(BufferedReader in, PrintWriter out) throws IOException, FinConnexionException {
         int numDoc;
-        out.println(Codage.coder("Entrez le numero du document que vous voulez retouner : "));
+        out.println(Codage.coder("Entrez le numero du document que vous voulez retouner > "));
         String line = Codage.decoder(in.readLine().trim());
         ServiceUtils.checkConnectionStatus(line, getClient());
         while ((numDoc = ServiceUtils.numIsCorrect(line)) == -1) {
@@ -100,8 +100,8 @@ public class ServiceEmpruntRetour extends Service {
             if (document.getDocumentAbime()) {
                 abonne.bannir();
                 message = "Le document a bien ete retourne. Cependant je constate, " + abonne.getNom()
-                    + ", que vous avez abime le document.\n Geronimo est intransigeant sur l'etat de retour des" +
-                    " documents empruntes !\n Vous etes donc banni jusqu'au : " + abonne.getDateBannissement()
+                    + ", que vous avez abime le document.\nGeronimo est intransigeant sur l'etat de retour des" +
+                    " documents empruntes !\nVous etes donc banni jusqu'au : " + abonne.getDateBannissement()
                     + " et la sentence est irrevoquable !\n";
             } else {
                 document.retour();
@@ -141,7 +141,7 @@ public class ServiceEmpruntRetour extends Service {
         }
 
         if (abonne.estBanni()) {
-            out.print(Codage.coder("Bonjour " + abonne.getNom() + "! \n N'oubliez pas que le grand chef Geronimo" +
+            out.print(Codage.coder("Bonjour " + abonne.getNom() + "! \nN'oubliez pas que le grand chef Geronimo" +
                 " vous a banni jusqu'au : " + abonne.getDateBannissement() + "\n"));
             return;
         }

@@ -106,9 +106,9 @@ public class Document implements IDocument {
     public void reservationPour(Abonne ab, Timer timer) throws EmpruntException {
         synchronized (this) {
             if (reservePar != null)
-                throw new EmpruntException("Le document est deja emprunte.");
-            if (empruntePar != null)
                 throw new EmpruntException("Le document est reserve par une autre personne.");
+            if (empruntePar != null)
+                throw new EmpruntException("Le document est deja emprunte.");
             if (Data.abonnePeutPasEmprunterDVD(this, ab))
                 throw new EmpruntException("Ce DVD est reserve aux adultes.");
             reservePar = ab;

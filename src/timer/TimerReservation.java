@@ -6,7 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class TimerReservation {
-    private static final long TPS_RESERVATION_MAX = 60_000; //TODO : mettre 2h
+    private static final long TPS_RESERVATION_MAX = 7_200_000;
     private final long heureDebut;
 
     public TimerReservation(IDocument doc, Timer timer) {

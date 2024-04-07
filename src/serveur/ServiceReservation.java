@@ -97,41 +97,39 @@ public class ServiceReservation extends Service {
                             TimerReservation timerReservation = doc.getTimerReservation();
                             if (timerReservation != null && timerReservation.getTempsRestant() <= TPS_FIN_RESERVATION_PROCHE) {
                                 out.println(Codage.coder("La reservation de ce document touche a sa fin. " +
-                                        "Veuillez patienter quelques instants en ecoutant notre musique celeste.\n" +
-                                        "Voulez-vous continuer ? (oui/non) > "));
-
+                                    "Veuillez patienter quelques instants en ecoutant notre musique celeste.\n" +
+                                    "A la fin de musique, entrez oui ou non pour valider la reservation du document"));
                                 AudioPlayer.playAudio("../musique/waiting_song.wav");
                                 Thread.sleep(TPS_INDULGENCE_EMPRUNT + timerReservation.getTempsRestant());
                                 AudioPlayer.stopAudio();
 
-                                //if (Data.estEmprunte(doc) || Data.estReserve(doc)) {
-                                message = "L'envoutement etait trop fort ! Vous auriez du faire une offrande plus" +
-                                        " importante au grand chaman.";
-                                break;
 
-                                /*} else {
+                                line = Codage.decoder(in.readLine().trim());
+                                ServiceUtils.checkConnectionStatus(line, getClient());
+
+                                while (!line.equalsIgnoreCase("oui")
+                                    && !line.equalsIgnoreCase("non")) {
+                                    line = "Veuillez entrer une reponse valide.";
+                                    out.println(Codage.coder(line));
                                     line = Codage.decoder(in.readLine().trim());
                                     ServiceUtils.checkConnectionStatus(line, getClient());
+                                }
 
-                                    while (!line.equalsIgnoreCase("oui")
-                                        && !line.equalsIgnoreCase("non")) {
-                                        line = "Veuillez entrer une reponse valide.";
-                                        out.println(Codage.coder(line));
-                                        line = Codage.decoder(in.readLine().trim());
-                                        ServiceUtils.checkConnectionStatus(line, getClient());
+                                if (Data.estReserve(doc) || Data.estEmprunte(doc)) {
+                                    message = "L'envoutement etait trop fort ! Vous auriez du faire une offrande plus" +
+                                        " importante au grand chaman.";
+                                } else if (line.equalsIgnoreCase("oui")) {
+                                    try {
+                                        doc.reservationPour(abonne, timer);
+                                        message = "Envoutement vaincu ! Vous avez bien reserve " + doc.getTitre();
+                                    } catch (EmpruntException e) {
+                                        message = e.getMessage();
                                     }
+                                } else {
+                                    message = "Reservation annule.";
+                                }
 
-                                    if (line.equalsIgnoreCase("oui")) {
-                                        try {
-                                            doc.reservationPour(abonne, timer);
-                                            message = "Envoutement vaincu ! Vous avez bien reserve " + doc.getTitre() + "\n";
-                                        } catch (EmpruntException e) {
-                                            message = e.getMessage();
-                                        }
-                                    } else {
-                                        message = "Reservation annule.";
-                                    }
-                                }*/
+
                             } else message = "Ce document est deja reserve.";
                         } else if (Data.estEmprunte(doc)) {
                             out.println(Codage.coder("Ce document est deja emprunte. Voulez-vous recevoir une" +
@@ -169,7 +167,7 @@ public class ServiceReservation extends Service {
                         } else {
                             synchronized (doc) {
                                 out.println(Codage.coder("Etes-vous sur de vouloir reserver le document suivant :" +
-                                    " \n" + doc.getTitre() + " ? (oui/non) > "
+                                    " \n" + doc.getTitre() + " ? (oui/non)"
                                 ));
                                 line = Codage.decoder(in.readLine().trim());
                                 ServiceUtils.checkConnectionStatus(line, getClient());

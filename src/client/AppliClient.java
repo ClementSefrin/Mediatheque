@@ -16,14 +16,14 @@ public class AppliClient {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Utilisation de BoxLayout pour aligner les composants verticalement
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         frame.getContentPane().add(panel);
 
-        JLabel label = new JLabel("Que voulez-vous faire ?");
-        label.setAlignmentX(Component.CENTER_ALIGNMENT); // Aligner le texte au centre horizontalement
+        JLabel label = new JLabel("Que voulez-vous faire ? > ");
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(label);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Utilisation de FlowLayout pour disposer les boutons côte-à-côte
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panel.add(buttonPanel);
 
         JButton reservationButton = new JButton("Reserver un document");

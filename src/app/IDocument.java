@@ -15,7 +15,7 @@ public interface IDocument {
 
     Abonne reserveur(); // Abonne qui a reserve le document
 
-    LocalDateTime dateEmprunt();
+    LocalDateTime getDateEmprunt();
 
     String getTitre();
 

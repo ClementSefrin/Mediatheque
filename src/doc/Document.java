@@ -98,7 +98,7 @@ public class Document implements IDocument {
     }
 
     @Override
-    public LocalDateTime dateEmprunt() {
+    public LocalDateTime getDateEmprunt() {
         return dateEmprunt;
     }
 

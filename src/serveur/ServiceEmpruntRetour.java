@@ -95,7 +95,7 @@ public class ServiceEmpruntRetour extends Service {
             message = "Le document n'est pas emprunte.\n";
         else {
             abonne = document.emprunteur();
-            LocalDateTime date = document.dateEmprunt();
+            LocalDateTime date = document.getDateEmprunt();
             document.ramdomDocumentAbime();
             if (document.getDocumentAbime()) {
                 abonne.bannir();

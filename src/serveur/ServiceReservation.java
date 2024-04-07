@@ -24,6 +24,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ServiceReservation extends Service {
+    private static final int TPS_FIN_RESERVATION_PROCHE = 30_000;
+    private static final int TPS_INDULGENCE_EMPRUNT = 60_000;
     private Timer timer = new Timer();
     private Abonne abonne;
 
@@ -93,12 +95,12 @@ public class ServiceReservation extends Service {
                     else {
                         if (Data.estReserve(doc)) {
                             TimerReservation timerReservation = doc.getTimerReservation();
-                            if (timerReservation != null && timerReservation.getTempsRestant() <= 15_000) {
-                                out.println(Codage.coder("La reservation de ce document touche a sa fin. Veuillez " +
-                                    "patienter quelques instants en ecoutant notre musique celeste. A la fin de musique," +
-                                    " entrez oui ou non pour valider la reservation du document"));
+                            if (timerReservation != null && timerReservation.getTempsRestant() <= TPS_FIN_RESERVATION_PROCHE) {
+                                out.println(Codage.coder("La reservation de ce document touche a sa fin. " +
+                                        "Veuillez patienter quelques instants en ecoutant notre musique celeste.\n" +
+                                        "A la fin de musique, entrez oui ou non pour valider la reservation du document"));
                                 AudioPlayer.playAudio("../musique/waiting_song.wav");
-                                Thread.sleep(timerReservation.getTempsRestant());
+                                Thread.sleep(TPS_INDULGENCE_EMPRUNT + timerReservation.getTempsRestant());
                                 AudioPlayer.stopAudio();
 
                                 if (Data.estReserve(doc)) {
@@ -108,6 +110,7 @@ public class ServiceReservation extends Service {
                                 } else {
                                     line = Codage.decoder(in.readLine().trim());
                                     ServiceUtils.checkConnectionStatus(line, getClient());
+
                                     while (!line.equalsIgnoreCase("oui")
                                         && !line.equalsIgnoreCase("non")) {
                                         line = "Veuillez entrer une reponse valide.";
@@ -129,8 +132,8 @@ public class ServiceReservation extends Service {
                                 }
                             } else message = "Ce document est deja reserve.";
                         } else if (Data.estEmprunte(doc)) {
-                            out.println(Codage.coder("Ce document est déjà emprunté. Voulez-vous recevoir une" +
-                                " alerte lorsque le document sera de nouveau disponible? (Oui/Non)"));
+                            out.println(Codage.coder("Ce document est deja emprunte. Voulez-vous recevoir une" +
+                                " alerte lorsque le document sera de nouveau disponible? (oui/non) > "));
 
                             line = Codage.decoder(in.readLine().trim());
                             ServiceUtils.checkConnectionStatus(line, getClient());
@@ -143,8 +146,8 @@ public class ServiceReservation extends Service {
                             }
 
                             if (line.equalsIgnoreCase("oui")) {
-                                out.println(Codage.coder("Entrez l'adresse mail à laquelle vous souhaitez être" +
-                                    " alerté."));
+                                out.println(Codage.coder("Entrez l'adresse mail a laquelle vous souhaitez etre" +
+                                    " alerte > "));
                                 line = Codage.decoder(in.readLine().trim());
                                 ServiceUtils.checkConnectionStatus(line, getClient());
                                 while (!checkEmail(line)) {
@@ -156,7 +159,7 @@ public class ServiceReservation extends Service {
 
                                 boolean ajout = doc.ajoutAlerteDisponibilite(line);
                                 message = ajout ? "Vous recevrez une alerte lorsque le document sera de nouveau" +
-                                    " disponible." : "Vous êtes déjà inscrit pour recevoir une alerte.";
+                                    " disponible." : "Vous etes deja inscrit pour recevoir une alerte.";
                             } else {
                                 message = "";
                             }
@@ -164,7 +167,7 @@ public class ServiceReservation extends Service {
                         } else {
                             try {
                                 doc.reservationPour(abonne, timer);
-                                message = "Vous avez bien reserve " + doc;
+                                message = "Vous avez bien reserve " + doc.getTitre();
                             } catch (EmpruntException e) {
                                 message = e.getMessage();
                             }

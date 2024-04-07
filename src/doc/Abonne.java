@@ -35,18 +35,28 @@ public class Abonne {
         return aujourdhui.minusYears(AGE_MAJEUR).isAfter(dateNaissance);
     }
 
+    public void debannir() {
+        estBanni = false;
+        dateBannissement = null;
+        System.out.println("L'abonné a été débanni.");
+    }
+
+
     public boolean estBanni() {
-        if(!estBanni)
+        if (!estBanni) {
             return false;
-        else {
-            if(LocalDate.now().isAfter(dateBannissement.toLocalDate()))
-                estBanni = false;
-            return estBanni;
         }
+        if (LocalDateTime.now().isAfter(dateBannissement)) {
+            debannir();
+            return false;
+        }
+        return true;
     }
 
     public void bannir() {
         estBanni = true;
+        // pour testé un bannissement de 1 minute
+        //dateBannissement = LocalDateTime.now().plusMinutes(0);
         dateBannissement = LocalDateTime.now().plusDays(DUREE_BAN);
          System.out.println("Vous avez ete banni pour 30 jours " + getDateBannissement());
     }

@@ -107,8 +107,8 @@ public class ServiceEmpruntRetour extends Service {
             else {
                 document.retour();
                 // ligne de test en seconde
-                //if (LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))) {
-                if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
+                if (LocalDateTime.now().isAfter(date.plusSeconds(DUREE_MAX_RENDU_SEMAINE))) {
+              //  if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
                     abonne.bannir();
                     message = "Document retourne avec succes, mais en retard.\n" + abonne.getNom()
                             + ", le grand chef Geronimo a decide de vous bannir pour 1 mois, soit jusqu'au :"
@@ -147,7 +147,7 @@ public class ServiceEmpruntRetour extends Service {
             return;
         }
 
-        String listeReservations = Data.afficherDocumentsReserves(abonne);
+        String listeReservations = Data.afficherDocumentsEmpruntes(abonne);
         out.println(Codage.coder(listeReservations + abonne.getNom() + ", quel est le numero"
                 + " du document que vous voulez emprunter ? > "));
 
@@ -166,7 +166,7 @@ public class ServiceEmpruntRetour extends Service {
         numDocument = Integer.parseInt(line);
         document = (Document) Data.getDocument(numDocument);
 
-        out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant : " + document.getTitre()
+        out.println(Codage.coder("Etes-vous sur de vouloir emprunter le document suivant : \n" + document.getTitre()
                 + " ? (oui/non) > "
                 ));
         line = Codage.decoder(in.readLine());

@@ -95,7 +95,7 @@ public class ServiceEmpruntRetour extends Service {
             message = "Le document n'est pas emprunte.\n";
         else {
             abonne = document.emprunteur();
-            LocalDateTime date = document.getDateEmprunt();
+            LocalDateTime dateEmprunt = document.getDateEmprunt();
             document.ramdomDocumentAbime();
             if (document.getDocumentAbime()) {
                 abonne.bannir();
@@ -106,8 +106,8 @@ public class ServiceEmpruntRetour extends Service {
             } else {
                 document.retour();
                 // ligne de test en seconde
-                if (LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))) {
-                    //  if(LocalDateTime.now().isAfter(date.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
+                if (LocalDateTime.now().isAfter(dateEmprunt.plusWeeks(DUREE_MAX_RENDU_SEMAINE))) {
+                    //  if(LocalDateTime.now().isAfter(dateEmprunt.plusWeeks(DUREE_MAX_RENDU_SEMAINE))){
                     abonne.bannir();
                     message = "Document retourne avec succes, mais en retard.\n" + abonne.getNom()
                         + ", le grand chef Geronimo a decide de vous bannir pour 1 mois, soit jusqu'au :"

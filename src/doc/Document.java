@@ -29,7 +29,7 @@ public class Document implements IDocument {
     private static final int DOC_EST_ABIME = 0;
     private static final String senderEmail = "clement.sefrin@gmail.com";
     private static final String appPassword = "jzsh zjyq snmg farl";
-    private static final String mailSub = "Nouveau document disponible";
+    private static final String mailSub = "Document a nouveau disponible";
 
     public Document(int numero, String titre) {
         this.numero = numero;

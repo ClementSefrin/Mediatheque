@@ -41,13 +41,9 @@ public class Abonne {
         System.out.println("L'abonne a ete debanni.");
     }
 
-
     public boolean estBanni() {
-        if (!estBanni || dateBannissement == null) {
-            return false;
-        }
-            if (LocalDateTime.now().isAfter(dateBannissement))
-            debannir();
+        if (dateBannissement == null) return false;
+        if (LocalDateTime.now().isAfter(dateBannissement)) debannir();
         return estBanni ;
     }
 

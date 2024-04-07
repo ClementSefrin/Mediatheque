@@ -6,6 +6,9 @@ import bttp3.AudioPlayer;
 import codage.Codage;
 import doc.Abonne;
 import doc.Document;
+import doc.Document;
+import doc.EmpruntException;
+import doc.ReservationInterditeException;
 import timer.AnnulerReservationTask;
 import timer.TimerReservation;
 

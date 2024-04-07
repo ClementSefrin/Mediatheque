@@ -165,11 +165,30 @@ public class ServiceReservation extends Service {
                             }
 
                         } else {
-                            try {
-                                doc.reservationPour(abonne, timer);
-                                message = "Vous avez bien reserve " + doc.getTitre();
-                            } catch (EmpruntException e) {
-                                message = e.getMessage();
+                            synchronized (doc) {
+                                out.println(Codage.coder("Etes-vous sur de vouloir reserver le document suivant :" +
+                                    " \n" + doc.getTitre() + " ? (oui/non)"
+                                ));
+                                line = Codage.decoder(in.readLine().trim());
+                                ServiceUtils.checkConnectionStatus(line, getClient());
+
+                                while (!line.equalsIgnoreCase("oui") && !line.equalsIgnoreCase("non")) {
+                                    line = "Veuillez entrer une reponse valide.";
+                                    out.println(Codage.coder(line));
+                                    line = Codage.decoder(in.readLine().trim());
+                                    ServiceUtils.checkConnectionStatus(line, getClient());
+                                }
+
+                                if (line.equalsIgnoreCase("oui")) {
+                                    try {
+                                        doc.reservationPour(abonne, timer);
+                                        message = "Vous avez bien reserve " + doc;
+                                    } catch (EmpruntException e) {
+                                        message = e.getMessage();
+                                    }
+                                } else {
+                                    message = "Reservation annulee.";
+                                }
                             }
                         }
                     }

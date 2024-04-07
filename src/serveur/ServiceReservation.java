@@ -5,6 +5,7 @@ import app.Data;
 import bttp3.AudioPlayer;
 import codage.Codage;
 import doc.Abonne;
+import doc.Document;
 import timer.AnnulerReservationTask;
 import timer.TimerReservation;
 
@@ -21,9 +22,11 @@ import java.util.regex.Pattern;
 public class ServiceReservation extends Service {
     private Timer timer = new Timer();
     private TimerTask annulerReservationTask;
+    private Abonne abonne;
 
     public ServiceReservation(Socket socket) {
         super(socket);
+        abonne = null;
     }
 
     @Override
@@ -35,18 +38,25 @@ public class ServiceReservation extends Service {
                 BufferedReader in = new BufferedReader(new InputStreamReader(this.getClient().getInputStream()));
                 PrintWriter out = new PrintWriter(this.getClient().getOutputStream(), true);
 
-                out.println(Codage.coder("Saisissez votre numero d'adherent > "));
-                String line = Codage.decoder(in.readLine());
                 int numeroAdherent;
-
-                while ((numeroAdherent = ServiceUtils.numIsCorrect(line)) == -1 && Data.getAbonne(numeroAdherent) != null) {
-                    line = "Veuillez entrer un numero valide.";
-                    out.println(Codage.coder(line));
-                    line = Codage.decoder(in.readLine());
+                String line = "";
+                if (abonne == null) {
+                    out.println(Codage.coder("Saisissez votre numero d'adherent > "));
+                    line = Codage.decoder(in.readLine().trim());
                     ServiceUtils.checkConnectionStatus(line, getClient());
+
+                    while ((numeroAdherent = ServiceUtils.numIsCorrect(line)) == -1 || !Data.abonneExiste(numeroAdherent)) {
+                        line = "Veuillez entrer un numero valide.";
+                        out.println(Codage.coder(line));
+                        line = Codage.decoder(in.readLine().trim());
+                        ServiceUtils.checkConnectionStatus(line, getClient());
+                    }
+
+                    numeroAdherent = Integer.parseInt(line);
+                    abonne = Data.getAbonne(numeroAdherent);
                 }
 
-                Abonne abonne = Data.getAbonne(numeroAdherent);
+
                 boolean continuer = true;
                 if (abonne.estBanni()) {
                     out.print(Codage.coder("Le grand chef Geronimo vous a banni jusqu'au : "
@@ -57,10 +67,23 @@ public class ServiceReservation extends Service {
                 while (continuer) {
                     assert abonne != null;
                     out.println(Codage.coder("Que voulez-vous reserver, " + abonne.getNom() + " ? > "));
-                    int numDocs = Integer.parseInt(Codage.decoder(in.readLine()));
-                    ServiceUtils.checkConnectionStatus(line, getClient());
 
-                    IDocument doc = Data.getDocument(numDocs);
+
+                    int numDocs;
+                    IDocument doc;
+
+                    line = Codage.decoder(in.readLine().trim());
+                    ServiceUtils.checkConnectionStatus(line, getClient());
+                    while ((numDocs = ServiceUtils.numIsCorrect(line)) == -1
+                        || !Data.documentExiste(doc = Data.getDocument(numDocs))) {
+                        out.println(Codage.coder("Veuillez entrer un numero valide."));
+                        line = Codage.decoder(in.readLine().trim());
+                        ServiceUtils.checkConnectionStatus(line, getClient());
+                    }
+
+                    numDocs = Integer.parseInt(line);
+                    doc = Data.getDocument(numDocs);
+
                     String message;
                     if (doc == null)
                         message = "Ce document n'existe pas.";
@@ -84,27 +107,34 @@ public class ServiceReservation extends Service {
                             out.println(Codage.coder("Ce document est déjà emprunté. Voulez-vous recevoir une" +
                                 " alerte lorsque le document sera de nouveau disponible? (Oui/Non)"));
 
-                            line = Codage.decoder(in.readLine());
+                            line = Codage.decoder(in.readLine().trim());
+                            ServiceUtils.checkConnectionStatus(line, getClient());
                             while (!line.equalsIgnoreCase("oui")
                                 && !line.equalsIgnoreCase("non")) {
                                 line = "Veuillez entrer une reponse valide.";
                                 out.println(Codage.coder(line));
-                                line = Codage.decoder(in.readLine());
+                                line = Codage.decoder(in.readLine().trim());
+                                ServiceUtils.checkConnectionStatus(line, getClient());
                             }
+
                             if (line.equalsIgnoreCase("oui")) {
                                 out.println(Codage.coder("Entrez l'adresse mail à laquelle vous souhaitez être" +
                                     " alerté."));
-                            }
-                            line = Codage.decoder(in.readLine());
-                            while (!checkEmail(line)) {
-                                line = "Veuillez rentrer un mail au format valide.";
-                                out.println(Codage.coder(line));
-                                line = Codage.decoder(in.readLine());
-                            }
+                                line = Codage.decoder(in.readLine().trim());
+                                ServiceUtils.checkConnectionStatus(line, getClient());
+                                while (!checkEmail(line)) {
+                                    line = "Veuillez rentrer un mail au format valide.";
+                                    out.println(Codage.coder(line));
+                                    line = Codage.decoder(in.readLine().trim());
+                                    ServiceUtils.checkConnectionStatus(line, getClient());
+                                }
 
-                            boolean ajout = doc.ajoutAlerteDisponibilite(line);
-                            message = ajout ? "Vous recevrez une alerte lorsque le document sera de nouveau disponible."
-                                : "Vous êtes déjà inscrit pour recevoir une alerte.";
+                                boolean ajout = doc.ajoutAlerteDisponibilite(line);
+                                message = ajout ? "Vous recevrez une alerte lorsque le document sera de nouveau" +
+                                    " disponible." : "Vous êtes déjà inscrit pour recevoir une alerte.";
+                            } else {
+                                message = "";
+                            }
 
                         } else {
                             if (Data.abonnePeutPasEmprunterDVD(doc, abonne)) {
@@ -118,8 +148,17 @@ public class ServiceReservation extends Service {
                         }
                     }
                     out.println(Codage.coder(message + "\nVoulez-vous continuer ? (oui/non) > "));
-                    continuer = Codage.decoder(in.readLine()).trim().equalsIgnoreCase("oui");
+                    line = Codage.decoder(in.readLine().trim());
                     ServiceUtils.checkConnectionStatus(line, getClient());
+
+                    while (!line.equalsIgnoreCase("oui") && !line.equals("non")) {
+                        line = "Veuillez entrer une reponse valide.";
+                        out.println(Codage.coder(line));
+                        line = Codage.decoder(in.readLine().trim());
+                        ServiceUtils.checkConnectionStatus(line, getClient());
+                    }
+
+                    continuer = line.equalsIgnoreCase("oui");
                 }
 
                 ServiceUtils.endConnection(this.getClient());

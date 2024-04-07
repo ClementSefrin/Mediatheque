@@ -143,7 +143,7 @@ public class Document implements IDocument {
             if (empruntePar != null) {
                 empruntePar = null;
                 dateEmprunt = null;
-                String message = "Le document suivant est de nouveau disponible : \n" + this.toString();
+                String message = "Le document suivant est de nouveau disponible : \n" + this.getTitre();
                 for (String mail : alerteDisponibilite) {
                     send(senderEmail, appPassword, mail, mailSub, message);
                 }

@@ -43,7 +43,10 @@ public class Abonne {
 
 
     public boolean estBanni() {
-        if (LocalDateTime.now().isAfter(dateBannissement))
+        if (!estBanni || dateBannissement == null) {
+            return false;
+        }
+            if (LocalDateTime.now().isAfter(dateBannissement))
             debannir();
         return estBanni ;
     }
